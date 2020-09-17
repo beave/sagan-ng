@@ -593,7 +593,7 @@ if test "$BLUEDOT" = "yes"; then
         fi
 
 test "x$prefix" = x. || test "x$prefix" = xNONE && prefix=/usr/local
-AC_DEFINE_UNQUOTED(CONFIG_FILE_PATH, "`eval echo "${sysconfdir}/sagan.yaml"`", [Sagan configuration file]) 
+AC_DEFINE_UNQUOTED(CONFIG_FILE_PATH, "`eval echo "${sysconfdir}/sagan_ng.yaml"`", [Sagan configuration file]) 
 
 AC_DEFINE_UNQUOTED(PACKAGE_NAME, "sagan" )
 AC_DEFINE_UNQUOTED(PACKAGE_STRING, "Sagan $VERSION")

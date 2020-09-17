@@ -7,6 +7,8 @@ AUTOMAKE_OPIONS=foreign no-dependencies subdir-objects
                                        sagan_ng_LDADD = $(LIBFASTJSON_LIBS) $(LIBLOGNORM_LIBS) $(LIBESTR_LIBS)
 
                                                sagan_ng_SOURCES = sagan-ng.c \
+						       credits.c \
+						       help.c \
                                                        util.c \
                                                        util-strlcpy.c \
                                                        util-strlcat.c \

@@ -2,15 +2,17 @@
 
 /* Sagan configuration struct (global) */
 
-typedef struct _SaganConfig _SaganConfig;
-struct _SaganConfig
+typedef struct _Config _Config;
+struct _Config
 {
 
     /* Non-dependent var's */
 
 //    bool         sagan_reload;
-//    bool         daemonize;
-//    bool         quiet;
+    bool         daemonize;
+    bool         quiet;
+
+    char 	 config_yaml[MAX_PATH];
 
 
 };

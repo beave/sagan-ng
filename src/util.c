@@ -2,9 +2,13 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include "util.h"
 #include "sagan-ng-defs.h"
+#include "sagan-config.h"
+
+struct _Config *Config;
 
 /**********************************
  * Shift a string to all lowercase
@@ -58,17 +62,25 @@ void Sagan_Log (int type, const char *format,... )
     //fprintf(config->sagan_log_stream, "[%s] [%s] - %s\n", chr, curtime, buf);
     //fflush(config->sagan_log_stream);
 
-    /*
-    if ( config->daemonize == 0 && config->quiet == 0 )
+    if ( Config->daemonize == 0 && Config->quiet == 0 )
         {
             printf("[%s] %s\n", chr, buf);
         }
-    */
 
     if ( type == ERROR )
         {
             exit(1);
         }
 
+}
+
+/********************
+ * Remove new-lines
+ ********************/
+void Remove_Return(char *s)
+{
+    char *s1, *s2;
+    for(s1 = s2 = s; *s1; *s1++ = *s2++ )
+        while( *s2 == '\n' )s2++;
 }
 
