@@ -30,50 +30,12 @@
 /*****************/
 
 #define		YAML_TYPE_VAR		1
-#define		YAML_TYPE_SAGAN_CORE	2
-#define		YAML_TYPE_PROCESSORS	3
-#define		YAML_TYPE_OUTPUT	4
-#define		YAML_TYPE_RULES		5
-#define		YAML_TYPE_INCLUDES	6
-
-/*******************/
-/* Secondary types */
-/*******************/
-
-/* Sagan core */
-
-#define 	YAML_SAGAN_CORE_CORE			101
-#define		YAML_SAGAN_CORE_MMAP_IPC		102
-#define		YAML_SAGAN_CORE_IGNORE_LIST		103
-#define		YAML_SAGAN_CORE_GEOIP			104
-#define 	YAML_SAGAN_CORE_LIBLOGNORM		105
-#define		YAML_SAGAN_CORE_PLOG			106
-#define		YAML_SAGAN_CORE_REDIS			107
-#define		YAML_SAGAN_CORE_PARSE_IP		108
-#define		YAML_SAGAN_CORE_RULESET_TRACKING	109
-
-
-/* Processors */
-
-#define		YAML_PROCESSORS_TRACK_CLIENTS	200
-#define		YAML_PROCESSORS_PERFMON		201
-#define		YAML_PROCESSORS_BLACKLIST	202
-#define		YAML_PROCESSORS_BLUEDOT		203
-#define		YAML_PROCESSORS_BROINTEL	204
-#define		YAML_PROCESSORS_DYNAMIC_LOAD	205
-#define		YAML_PROCESSORS_CLIENT_STATS	206
-#define		YAML_PROCESSORS_STATS_JSON	207
-
-/* Outputs */
-
-#define		YAML_OUTPUT_UNIFIED2		300
-#define		YAML_OUTPUT_EXTERNAL		301
-#define		YAML_OUTPUT_SMTP		302
-#define		YAML_OUTPUT_SNORTSAM		303
-#define		YAML_OUTPUT_SYSLOG		304
-#define		YAML_OUTPUT_FAST		305
-#define		YAML_OUTPUT_ALERT		306
-#define		YAML_OUTPUT_EVE			307
+#define         YAML_TYPE_CORE          2
+#define		YAML_TYPE_INPUT		3
+#define         YAML_TYPE_OUTPUT        4
+#define		YAML_TYPE_PROCESSORS	5
+#define		YAML_TYPE_RULES		6
+#define		YAML_TYPE_INCLUDES	7
 
 void Load_YAML_Config( const char * );
 

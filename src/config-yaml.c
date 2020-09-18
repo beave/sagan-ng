@@ -39,6 +39,8 @@ void Load_YAML_Config( const char *yaml_file )
 
     bool done = false;
 
+    char var_to_value[MAX_VAR_VALUE_SIZE] = { 0 };
+
     struct stat filecheck;
 
     unsigned char type = 0;
@@ -46,6 +48,8 @@ void Load_YAML_Config( const char *yaml_file )
     unsigned char toggle = 0;
 
     char *tok = NULL;
+
+    char last_pass[128] = { 0 }; 
 
 
     yaml_parser_t parser;
@@ -152,6 +156,9 @@ void Load_YAML_Config( const char *yaml_file )
                 {
 
                     char *value = (char *)event.data.scalar.value;
+
+		    Var_To_Value(value, var_to_value, sizeof(var_to_value));
+
 
                     if ( Debug->config )
                         {
@@ -290,6 +297,41 @@ void Load_YAML_Config( const char *yaml_file )
 
                         }  /* if type == YAML_TYPE_VAR */
 
+			else if ( type == YAML_TYPE_CORE ) 
+				{
+
+				if ( !strcmp(last_pass, "ip" ) )
+					{
+			
+					if (  Validate_IP(var_to_value) == true )
+						{
+						strlcpy(Config->ip, var_to_value, sizeof(Config->ip));
+						} else { 
+						Sagan_Log(ERROR, "[%s, line %d] The configuration 'ip' is set to %s which is not a valid IPv4/IPv6 address. Abort", __FILE__, __LINE__, var_to_value);
+						}
+					}
+
+				if ( !strcmp(last_pass, "port" ) ) 
+					{
+
+					Config->port = atoi(var_to_value);
+
+					if (  Config->port == 0 ) 
+						{
+						Sagan_Log(ERROR, "[%s, line %d] The configuration 'port' is set to %s which is not a valid port. Abort", __FILE__, __LINE__, var_to_value);
+						}
+
+					}
+
+				
+			
+
+
+				}
+
+		     strlcpy(last_pass, var_to_value, sizeof(last_pass));
+
+
                     /**** Tag types *************************************************/
 
                     /**************/
@@ -308,6 +350,20 @@ void Load_YAML_Config( const char *yaml_file )
                             toggle = 0;
 
                         } /* tag: var */
+
+                    else if (!strcmp(value, "configuration"))
+                        {
+
+                            if ( Debug->config )
+                                {
+                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found \"configuration\" ****", __FILE__, __LINE__);
+                                }
+
+                            type = YAML_TYPE_CORE;
+                            toggle = 0;
+
+                        } /* tag: var */
+
 
 
                 } /* End of "while */
