@@ -18,31 +18,10 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/************************/
-/* Minimum YAML version */
-/************************/
+#ifdef HAVE_CONFIG_H
+#include "config.h"             /* From autoconf */
+#endif
 
-#define YAML_VERSION_MAJOR 1
-#define YAML_VERSION_MINOR 1
-
-/*****************/
-/* Primary types */
-/*****************/
-
-#define		YAML_TYPE_VAR		1
-#define         YAML_TYPE_CORE          2
-#define		YAML_TYPE_INPUT		3
-#define         YAML_TYPE_OUTPUT        4
-#define		YAML_TYPE_PROCESSORS	5
-#define		YAML_TYPE_RULES		6
-#define		YAML_TYPE_INCLUDES	7
-
-/*************/
-/* Sub Types */
-/*************/
-
-#define		YAML_SUBTYPE_INPUT_PIPE		1
-
-
-void Load_YAML_Config( const char * );
+void Remove_Lock_File ( void );
+void CheckLockFile ( void );
 

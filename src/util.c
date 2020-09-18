@@ -5,6 +5,9 @@
 #include <stdbool.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 
 #include "util.h"
 #include "sagan-ng-defs.h"
@@ -126,7 +129,7 @@ void Replace_String(char *in_str, char *orig, char *rep, char *str, size_t size)
 
 /****************************************************************************
  * Var_To_Value - Changes a variable in a configuration file (for
- * example - $RULE_PATH into it's true value.  
+ * example - $RULE_PATH into it's true value.
  * ** README ** Don't use in live engine due to strstr.
  ****************************************************************************/
 
@@ -168,4 +171,70 @@ void Var_To_Value(char *in_str, char *str, size_t size)
 
 }
 
+/*
+void Droppriv(void)
+{
 
+    struct stat fifocheck;
+    struct passwd *pw = NULL;
+    int ret;
+
+    pw = getpwnam(Config->runas);
+
+    if (!pw)
+        {
+            Sagan_Log(ERROR, "Couldn't locate user '%s'. Aborting...", Config->runas);
+        }
+
+    if ( getuid() == 0 )
+        {
+
+            /*
+             * We chown certain log files to our Sagan user.  This is done so no files are "owned"
+             * by "root".  This prevents problems in the future when doing things like handling
+                 * SIGHUP's and what not.
+                 *
+                 * Champ Clark (04/14/2015)
+                 */
+
+//            if ( config->sagan_is_file == false )       /* Don't change ownsership/etc if we're processing a file */
+//                {
+
+/*                    if ( Config->chown_fifo == true )
+                        {
+
+                            Sagan_Log(NORMAL, "Changing FIFO '%s' ownership to '%s'.", config->sagan_fifo, config->sagan_runas);
+
+                            ret = chown(config->sagan_fifo, (unsigned long)pw->pw_uid,(unsigned long)pw->pw_gid);
+
+                            if ( ret < 0 )
+                                {
+                                    Sagan_Log(ERROR, "[%s, line %d] Cannot change ownership of %s to username \"%s\" - %s", __FILE__, __LINE__, config->sagan_fifo, config->sagan_runas, strerror(errno));
+                                }
+                        }
+
+
+                    if (stat(config->sagan_fifo, &fifocheck) != 0 )
+                        {
+                            Sagan_Log(ERROR, "[%s, line %d] Cannot open %s FIFO - %s!",  __FILE__, __LINE__, config->sagan_fifo, strerror(errno));
+                        }
+
+//                }
+
+
+            Sagan_Log(NORMAL, "Dropping privileges! [UID: %lu GID: %lu]", (unsigned long)pw->pw_uid, (unsigned long)pw->pw_gid);
+
+            if (initgroups(pw->pw_name, pw->pw_gid) != 0 ||
+                    setgid(pw->pw_gid) != 0 || setuid(pw->pw_uid) != 0)
+                {
+                    Sagan_Log(ERROR, "[%s, line %d] Could not drop privileges to uid: %lu gid: %lu - %s!", __FILE__, __LINE__, (unsigned long)pw->pw_uid, (unsigned long)pw->pw_gid, strerror(errno));
+                }
+
+        }
+    else
+        {
+            Sagan_Log(NORMAL, "Not dropping privileges.  Already running as a non-privileged user");
+        }
+}
+
+*/

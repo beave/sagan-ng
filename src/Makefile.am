@@ -10,6 +10,7 @@ AUTOMAKE_OPIONS=foreign no-dependencies subdir-objects
 						       credits.c \
 						       help.c \
                                                        util.c \
+						       lockfile.c \
                                                        util-strlcpy.c \
                                                        util-strlcat.c \
                                                        config-yaml.c \

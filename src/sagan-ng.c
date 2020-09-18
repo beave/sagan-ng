@@ -42,6 +42,7 @@
 #include "sagan-config.h"
 #include "counters.h"
 #include "debug.h"
+#include "lockfile.h"
 
 /* Notes:
 
@@ -175,6 +176,9 @@ int main(int argc, char **argv)
 
 
     Load_YAML_Config( Config->config_yaml );
+
+//    CheckLockFile();
+
 
 
 }
