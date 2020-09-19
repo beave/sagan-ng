@@ -1,3 +1,4 @@
+#include <string.h>
 
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *, const char *, size_t );

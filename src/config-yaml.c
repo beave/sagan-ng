@@ -2,7 +2,9 @@
 /* NOTES:
 
    SENSOR AND CLSUTER NOT BEING PARSED!
-   NO DEFAULTS BEING SET */
+   NO DEFAULTS BEING SET
+
+*/
 
 
 
@@ -18,8 +20,6 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <libgen.h>
-
-
 
 #include "sagan-ng.h"
 #include "sagan-ng-defs.h"

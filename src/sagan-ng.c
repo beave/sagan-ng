@@ -31,6 +31,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <fcntl.h>
+#include <signal.h>
 
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
@@ -43,12 +45,14 @@
 #include "counters.h"
 #include "debug.h"
 #include "lockfile.h"
+#include "signal-handler.h"
+
+#include "input-plugins/named-pipe.h"
 
 /* Notes:
 
    Command line...  (need --config option)
    Move *Config array to config-yaml.c? Or at least clear it there?
-   Load config
    Signal Handler
 
 */
@@ -57,16 +61,19 @@ struct _Config *Config = NULL;
 struct _Counters *Counters = NULL;
 struct _Debug *Debug = NULL;
 
+bool Global_Death = false;
+
 
 int main(int argc, char **argv)
 {
 
 #ifdef HAVE_SYS_PRCTL_H
-    (void)SetThreadName("SaganMain");
+    (void)SetThreadName("SaganNGMain");
 #endif
 
-    signed char c = 0;
-
+    int8_t c = 0;
+    uint8_t key = 0;
+    uint8_t rc = 0;
 
     /* Allocate memory for global struct _Config */
 
@@ -102,6 +109,17 @@ int main(int argc, char **argv)
     memset(Debug, 0, sizeof(_Debug));
 
     /**********************************************************************
+     * Thread variables
+    **********************************************************************/
+
+    /* Block all signals,  we create a signal handling thread */
+
+    sigset_t signal_set;
+    pthread_t sig_thread;
+    sigfillset( &signal_set );
+    pthread_sigmask( SIG_BLOCK, &signal_set, NULL );
+
+    /**********************************************************************
      * Defaults
      **********************************************************************/
 
@@ -131,6 +149,21 @@ int main(int argc, char **argv)
 
     int option_index = 0;
 
+    /* "systemd" wants to start Sagan in the foreground,  but doesn't know what to
+     * do with stdin/stdout.  Hence,  CPU goes to 100%.  This detects our terminal
+     * type ( >/dev/null </dev/null ) and tell's Sagan to ignore input and output.
+     *
+     * For more details, see:
+     *
+     * https://groups.google.com/forum/#!topic/sagan-users/kgJvf1eyQcg
+     *
+     */
+
+    if ( !isatty(0) || !isatty(1) || !isatty(2) )
+        {
+            Config->quiet = true;
+        }
+
     while ((c = getopt_long(argc, argv, short_options, long_options, &option_index)) != -1)
         {
 
@@ -153,6 +186,7 @@ int main(int argc, char **argv)
 
                 case 'D':
                     Config->daemonize = true;
+                    Config->quiet = true;
                     break;
 
                 case 'd':
@@ -174,11 +208,159 @@ int main(int argc, char **argv)
                 }
         }
 
+    /* NOTE: Open log file here */
+
+    if ( Config->daemonize )
+        {
+
+            Sagan_Log(NORMAL, "Becoming a daemon!");
+
+            pid_t pid = 0;
+            pid = fork();
+
+            if ( pid == 0 )
+                {
+
+                    /* Child */
+
+                    if ( setsid() == -1 )
+                        {
+                            Sagan_Log(ERROR, "[%s, line %d] Failed creating new session while daemonizing", __FILE__, __LINE__);
+                            exit(1);
+                        }
+
+                    pid = fork();
+
+                    if ( pid == 0 )
+                        {
+
+                            /* Grandchild, the actual daemon */
+
+                            if ( chdir("/") == -1 )
+                                {
+                                    Sagan_Log(ERROR, "[%s, line %d] Failed changing directory to / after daemonizing [errno %d]", __FILE__, __LINE__, errno);
+                                    exit(1);
+                                }
+
+                            /* Close and re-open stdin, stdout, and stderr, so as to
+                               to release anyone waiting on them. */
+
+                            close(0);
+                            close(1);
+                            close(2);
+
+                            if ( open("/dev/null", O_RDONLY) == -1 )
+                                {
+                                    Sagan_Log(ERROR, "[%s, line %d] Failed reopening stdin after daemonizing [errno %d]", __FILE__, __LINE__, errno);
+                                }
+
+                            if ( open("/dev/null", O_WRONLY) == -1 )
+                                {
+                                    Sagan_Log(ERROR, "[%s, line %d] Failed reopening stdout after daemonizing [errno %d]", __FILE__, __LINE__, errno);
+                                }
+
+                            if ( open("/dev/null", O_RDWR) == -1 )
+                                {
+                                    Sagan_Log(ERROR, "[%s, line %d] Failed reopening stderr after daemonizing [errno %d]", __FILE__, __LINE__, errno);
+                                }
+
+                        }
+                    else if ( pid < 0 )
+                        {
+
+                            Sagan_Log(ERROR, "[%s, line %d] Failed second fork while daemonizing", __FILE__, __LINE__);
+                            exit(1);
+
+                        }
+                    else
+                        {
+
+                            exit(0);
+                        }
+
+                }
+            else if ( pid < 0 )
+                {
+
+                    Sagan_Log(ERROR, "[%s, line %d] Failed first fork while daemonizing", __FILE__, __LINE__);
+                    exit(1);
+
+                }
+            else
+                {
+
+                    /* Wait for child to exit */
+                    waitpid(pid, NULL, 0);
+                    exit(0);
+                }
+        }
+
 
     Load_YAML_Config( Config->config_yaml );
 
-//    CheckLockFile();
+    CheckLockFile();
+
+//    Droppriv();              /* Become the Sagan user */
 
 
+    /************************************************************************
+     * Signal handler thread
+     ************************************************************************/
+
+    rc = pthread_create( &sig_thread, NULL, (void *)Signal_Handler, NULL );
+
+    if ( rc != 0  )
+        {
+            Remove_Lock_File();
+            Sagan_Log(ERROR, "[%s, line %d] Error creating Signal_Handler thread. [error: %d]", __FILE__, __LINE__, rc);
+        }
+
+    /* Spawn threads here */
+
+    if ( Config->named_pipe_flag == true )
+        {
+
+            pthread_t named_pipe_thread;
+            pthread_attr_t thread_named_pipe_attr;
+            pthread_attr_init(&thread_named_pipe_attr);
+            pthread_attr_setdetachstate(&thread_named_pipe_attr,  PTHREAD_CREATE_DETACHED);
+
+            rc = pthread_create( &named_pipe_thread, NULL, (void *)Input_Named_Pipe, NULL );
+
+            if ( rc != 0  )
+                {
+                    Remove_Lock_File();
+                    Sagan_Log(ERROR, "[%s, line %d] Error creating Input_Named_Pipe thread. [error: %d]", __FILE__, __LINE__, rc);
+                }
+
+        }
+
+    Droppriv();
+
+    while( Global_Death == false)
+        {
+
+
+            if ( Config->daemonize == false )
+                {
+
+                    key=getchar();
+
+                    if ( key != 0 )
+                        {
+                            //Statistics();
+                            printf("Got key\n");
+                        }
+
+                }
+            else
+                {
+
+                    /* Prevents eating CPU when in background! */
+
+                    sleep(1);
+                }
+
+        }
 
 }

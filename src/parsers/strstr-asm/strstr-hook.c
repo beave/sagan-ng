@@ -93,8 +93,8 @@ char *Sagan_stristr(const char *_x, const char *_y, bool needle_lower )
 {
 
     char *p = NULL;
-    char haystack_string[MAX_JSON_SIZE] = { 0 };
-    char needle_string[512] = { 0 };
+    char haystack_string[MAX_HAYSTACK] = { 0 };
+    char needle_string[MAX_NEEDLE] = { 0 };
 
     strlcpy(haystack_string, _x, sizeof(haystack_string));
     To_LowerC(haystack_string);

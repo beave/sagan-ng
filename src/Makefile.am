@@ -11,12 +11,16 @@ AUTOMAKE_OPIONS=foreign no-dependencies subdir-objects
 						       help.c \
                                                        util.c \
 						       lockfile.c \
+						       signal-handler.c \
+						       batch.c \
                                                        util-strlcpy.c \
                                                        util-strlcat.c \
                                                        config-yaml.c \
                                                        parsers/strstr-asm/strstr-hook.c \
                                                        parsers/strstr-asm/strstr_sse2.S \
-                                                       parsers/strstr-asm/strstr_sse4_2.S
+                                                       parsers/strstr-asm/strstr_sse4_2.S \
+						       input-plugins/named-pipe.c \
+						       processors/engine.c
 
                                                        install-data-local:
 

@@ -9,7 +9,7 @@
  * Limits
  ***************************************************************************/
 
-#define		MAX_JSON_SIZE			16777216
+#define		MAX_JSON_SIZE			1048576
 
 #define		THREAD_NAME_LEN			16
 
@@ -17,6 +17,9 @@
 
 #define		MAX_CONFIG_LINE			32786
 
+
+#define		MAX_HAYSTACK			32786
+#define		MAX_NEEDLE			512
 
 /***************************************************************************
  * For Sagan_LOG()

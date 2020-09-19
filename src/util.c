@@ -1,3 +1,8 @@
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"             /* From autoconf */
+#endif
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -7,6 +12,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <pwd.h>
+#include <errno.h>
+#include <string.h>
 
 
 #include "util.h"
@@ -171,7 +181,6 @@ void Var_To_Value(char *in_str, char *str, size_t size)
 
 }
 
-/*
 void Droppriv(void)
 {
 
@@ -200,26 +209,21 @@ void Droppriv(void)
 //            if ( config->sagan_is_file == false )       /* Don't change ownsership/etc if we're processing a file */
 //                {
 
-/*                    if ( Config->chown_fifo == true )
-                        {
+            /*
+                        if ( Config->named_pipe_chown == true )
+                            {
 
-                            Sagan_Log(NORMAL, "Changing FIFO '%s' ownership to '%s'.", config->sagan_fifo, config->sagan_runas);
+                                Sagan_Log(NORMAL, "Changing FIFO '%s' ownership to '%s'.", Config->named_pipe, Config->runas);
 
-                            ret = chown(config->sagan_fifo, (unsigned long)pw->pw_uid,(unsigned long)pw->pw_gid);
+                                ret = chown(Config->named_pipe, (unsigned long)pw->pw_uid,(unsigned long)pw->pw_gid);
 
-                            if ( ret < 0 )
-                                {
-                                    Sagan_Log(ERROR, "[%s, line %d] Cannot change ownership of %s to username \"%s\" - %s", __FILE__, __LINE__, config->sagan_fifo, config->sagan_runas, strerror(errno));
-                                }
-                        }
+                                if ( ret < 0 )
+                                    {
+                                        Sagan_Log(ERROR, "[%s, line %d] Cannot change ownership of %s to username \"%s\" - %s", __FILE__, __LINE__, Config->named_pipe, Config->runas, strerror(errno));
+                                    }
+                            }
 
-
-                    if (stat(config->sagan_fifo, &fifocheck) != 0 )
-                        {
-                            Sagan_Log(ERROR, "[%s, line %d] Cannot open %s FIFO - %s!",  __FILE__, __LINE__, config->sagan_fifo, strerror(errno));
-                        }
-
-//                }
+            */
 
 
             Sagan_Log(NORMAL, "Dropping privileges! [UID: %lu GID: %lu]", (unsigned long)pw->pw_uid, (unsigned long)pw->pw_gid);
@@ -237,4 +241,52 @@ void Droppriv(void)
         }
 }
 
-*/
+
+/****************************************************************************
+ * Set_Pipe_Size - Changes the capacity of the pipe/FIFO.
+ ****************************************************************************/
+
+#if defined(HAVE_GETPIPE_SZ) && defined(HAVE_SETPIPE_SZ)
+
+void Set_Pipe_Size ( FILE *fd )
+{
+
+    int fd_int;
+    int current_fifo_size;
+    int fd_results;
+
+
+    if ( Config->named_pipe_size != 0 )
+        {
+
+            fd_int = fileno(fd);
+            current_fifo_size = fcntl(fd_int, F_GETPIPE_SZ);
+
+            if ( current_fifo_size == Config->named_pipe_size )
+                {
+
+                    Sagan_Log(NORMAL, "Named pipe capacity already set to %d bytes.", Config->named_pipe_size);
+
+                }
+            else
+                {
+
+                    Sagan_Log(NORMAL, "Named pipe capacity is %d bytes.  Changing to %d bytes.", current_fifo_size, Config->named_pipe_size);
+
+                    fd_results = fcntl(fd_int, F_SETPIPE_SZ, Config->named_pipe_size );
+
+                    if ( fd_results == -1 )
+                        {
+                            Sagan_Log(WARN, "Named pipe capacity could not be changed.  Continuing anyways...");
+                        }
+
+                    if ( fd_results > Config->named_pipe_size )
+                        {
+                            Sagan_Log(WARN, "Named pipe  capacity was rounded up to the next page size of %d bytes.", fd_results);
+                        }
+                }
+        }
+}
+
+#endif
+

@@ -1,0 +1,4 @@
+processors/sagan_ng-engine.o: processors/engine.c \
+ /usr/include/stdc-predef.h
+
+/usr/include/stdc-predef.h:

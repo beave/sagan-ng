@@ -7,4 +7,7 @@ struct _Counters
 
     uint32_t	var;
 
+    uint64_t	input_received;
+
+
 };
