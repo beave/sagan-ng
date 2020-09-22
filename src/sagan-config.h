@@ -1,5 +1,6 @@
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Sagan configuration struct (global) */
 
@@ -22,10 +23,10 @@ struct _Config
     /***********************************************************************/
 
     char		runas[32];
-    char		ip[46];
-    char		proto[5];
-    unsigned char	proto_int;
-    uint32_t            port;
+//    char		ip[46];
+//    char		proto[5];
+//    unsigned char	proto_int;
+//    uint32_t            port;
     uint32_t		max_threads;
     unsigned char	batch_size;
     char	        classifications_file[MAX_PATH];

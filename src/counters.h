@@ -10,4 +10,7 @@ struct _Counters
     uint64_t	input_received;
 
 
+    uint16_t	classifications;
+
+
 };

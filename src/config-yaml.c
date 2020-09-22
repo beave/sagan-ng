@@ -318,6 +318,7 @@ void Load_YAML_Config( const char *yaml_file )
                     else if ( type == YAML_TYPE_CORE )
                         {
 
+/*
                             if ( !strcmp(last_pass, "ip" ) )
                                 {
 
@@ -384,8 +385,9 @@ void Load_YAML_Config( const char *yaml_file )
                                         }
 
                                 }
+			*/
 
-                            else if ( !strcmp(last_pass, "max-threads" ) )
+                            if ( !strcmp(last_pass, "max-threads" ) )
                                 {
 
                                     Config->max_threads = atoi(var_to_value);

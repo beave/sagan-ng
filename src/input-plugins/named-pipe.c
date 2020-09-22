@@ -87,7 +87,6 @@ void Input_Named_Pipe(void)
     char *input = NULL;
     input = (char*)malloc( MAX_JSON_SIZE * sizeof(char) );  /* allocating memory dynamically  */
 
-//char input[8388608] = { 0 };
     bool pipe_error = false;
     FILE *fd;
 
@@ -130,8 +129,8 @@ void Input_Named_Pipe(void)
 
                             // SEND TO BATCH!
 
-                            printf("----------------------------------------------------\n");
-                            printf("send to queue: %s\n", input );
+//                           printf("----------------------------------------------------\n");
+//                            printf("send to queue: %s\n", input );
                             Batch( input );
 
                         } /* while(fgets) */

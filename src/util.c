@@ -105,6 +105,17 @@ void Remove_Return(char *s)
         while( *s2 == '\n' )s2++;
 }
 
+/***********************************************
+ * Removes spaces from certain rule fields, etc
+ ***********************************************/
+
+void Remove_Spaces(char *s)
+{
+    char *s1, *s2;
+    for(s1 = s2 = s; *s1; *s1++ = *s2++ )
+        while( *s2 == ' ')s2++;
+}
+
 
 bool Validate_IP(const char *ip)
 {

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <errno.h>
 
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *, const char *, size_t );

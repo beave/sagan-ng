@@ -18,11 +18,78 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"             /* From autoconf */
 #endif
+
 #include <stdio.h>
+#include <stdint.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+
+#include "version.h"
+#include "sagan-ng-defs.h"
+#include "sagan-ng.h"
+#include "sagan-config.h"
+#include "counters.h"
+#include "batch.h"
+
+pthread_cond_t InputDoWork=PTHREAD_COND_INITIALIZER;
+pthread_mutex_t InputWorkMutex=PTHREAD_MUTEX_INITIALIZER;
+
+struct _Input_Batch *Input_Batch = NULL;
+
+struct _Config *Config;
+
+uint16_t batch_count = 0;
+uint16_t processor_message_slot = 0; 
+uint16_t processor_running_threads = 0;
+
+//char batch[MAX_BATCH][MAX_JSON_SIZE] = { 0 };
+
+
+void Batch_Init( void )
+{
+
+    Input_Batch = malloc(Config->max_threads * sizeof(_Input_Batch));
+
+    if ( Input_Batch == NULL )
+        {
+            Sagan_Log(ERROR, "[%s, line %d] Failed to allocate memory for _Input_Batch. Abort!", __FILE__, __LINE__);
+        }
+
+    memset(Input_Batch, 0, sizeof(struct _Input_Batch));
+
+}
+
 
 void Batch( const char *input )
 {
 
-    printf("IN BATCH: |%s|\n", input);
+    if ( batch_count >= Config->batch_size )
+	{
+
+//	printf("Send to batch!\n");
+
+	if ( processor_message_slot < Config->max_threads )
+		{
+		printf("Send work\n");
+
+		pthread_mutex_lock(&InputWorkMutex);
+
+		processor_message_slot++; 
+
+                pthread_cond_signal(&InputDoWork);
+                pthread_mutex_unlock(&InputWorkMutex);
+
+		}
+
+	__atomic_store_n (&batch_count, 0, __ATOMIC_SEQ_CST);
+
+
+	}
+
+    strlcpy(Input_Batch[batch_count].input, input, MAX_JSON_SIZE);
+
+    __atomic_add_fetch(&batch_count, 1, __ATOMIC_SEQ_CST);
+//    printf("Batch is at: %d\n", batch_count);
 
 }

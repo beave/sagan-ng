@@ -46,6 +46,11 @@
 #include "debug.h"
 #include "lockfile.h"
 #include "signal-handler.h"
+#include "processor.h"
+#include "batch.h"
+#include "classifications.h"
+#include "rules.h"
+
 
 #include "input-plugins/named-pipe.h"
 
@@ -74,6 +79,7 @@ int main(int argc, char **argv)
     int8_t c = 0;
     uint8_t key = 0;
     uint8_t rc = 0;
+    uint16_t i = 0; 
 
     /* Allocate memory for global struct _Config */
 
@@ -124,7 +130,6 @@ int main(int argc, char **argv)
      **********************************************************************/
 
     strlcpy(Config->config_yaml, CONFIG_FILE_PATH, sizeof(Config->config_yaml));   /* From config.h */
-
 
     /**********************************************************************
      * Command line
@@ -300,6 +305,9 @@ int main(int argc, char **argv)
 
     CheckLockFile();
 
+    Load_Classifications();
+    Load_Rulesets();
+
 //    Droppriv();              /* Become the Sagan user */
 
 
@@ -314,6 +322,35 @@ int main(int argc, char **argv)
             Remove_Lock_File();
             Sagan_Log(ERROR, "[%s, line %d] Error creating Signal_Handler thread. [error: %d]", __FILE__, __LINE__, rc);
         }
+
+    /* Init batch queue */
+
+    Batch_Init();
+
+
+    /* Main processor! */
+
+    pthread_t processor_id[Config->max_threads];
+    pthread_attr_t thread_processor_attr;
+    pthread_attr_init(&thread_processor_attr);
+    pthread_attr_setdetachstate(&thread_processor_attr,  PTHREAD_CREATE_DETACHED);
+
+    Sagan_Log(NORMAL, "Spawning %d Processor Threads.", Config->max_threads);
+
+    for (i = 0; i < Config->max_threads; i++)
+        {
+
+            rc = pthread_create ( &processor_id[i], &thread_processor_attr, (void *)Processor, NULL );
+
+            if ( rc != 0 )
+                {
+
+                    Remove_Lock_File();
+                    Sagan_Log(ERROR, "Could not create Processor threads. [error: %d]", rc);
+
+                }
+        }
+
 
     /* Spawn threads here */
 

@@ -13,9 +13,13 @@ AUTOMAKE_OPIONS=foreign no-dependencies subdir-objects
 						       lockfile.c \
 						       signal-handler.c \
 						       batch.c \
+						       processor.c \
                                                        util-strlcpy.c \
                                                        util-strlcat.c \
                                                        config-yaml.c \
+						       classifications.c \
+						       rules.c \
+					               parsers/json.c \
                                                        parsers/strstr-asm/strstr-hook.c \
                                                        parsers/strstr-asm/strstr_sse2.S \
                                                        parsers/strstr-asm/strstr_sse4_2.S \
