@@ -11,6 +11,7 @@ struct _Counters
 
 
     uint16_t	classifications;
+    uint32_t	rules;
 
 
 };

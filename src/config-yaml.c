@@ -29,6 +29,7 @@
 #include "var.h"
 #include "counters.h"
 #include "debug.h"
+#include  "rules.h"
 
 #ifdef HAVE_LIBYAML
 #include <yaml.h>
@@ -521,6 +522,13 @@ void Load_YAML_Config( const char *yaml_file )
 
                         }
 
+		    else if ( type == YAML_TYPE_RULES )
+			{
+
+			Load_Ruleset( var_to_value );
+
+			}
+
 
 
 
@@ -571,6 +579,20 @@ void Load_YAML_Config( const char *yaml_file )
                             toggle = 0;
 
                         } /* tag: var */
+
+		    else if ( !strcmp(value, "rule-files" ))
+			{
+
+                            if ( Debug->config )
+                                {
+                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found \"rule-files\" ****", __FILE__, __LINE__);
+                                }
+
+                            type = YAML_TYPE_RULES;
+                            toggle = 0;
+
+			}
+			
 
 
 

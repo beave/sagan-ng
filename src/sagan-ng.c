@@ -306,7 +306,6 @@ int main(int argc, char **argv)
     CheckLockFile();
 
     Load_Classifications();
-    Load_Rulesets();
 
 //    Droppriv();              /* Become the Sagan user */
 
