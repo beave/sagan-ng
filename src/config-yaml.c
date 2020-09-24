@@ -319,74 +319,74 @@ void Load_YAML_Config( const char *yaml_file )
                     else if ( type == YAML_TYPE_CORE )
                         {
 
-/*
-                            if ( !strcmp(last_pass, "ip" ) )
-                                {
+                            /*
+                                                        if ( !strcmp(last_pass, "ip" ) )
+                                                            {
 
-                                    if (  Validate_IP(var_to_value) == true )
-                                        {
-                                            strlcpy(Config->ip, var_to_value, sizeof(Config->ip));
-                                        }
-                                    else
-                                        {
-                                            Sagan_Log(ERROR, "[%s, line %d] The configuration 'ip' is set to %s which is not a valid IPv4/IPv6 address. Abort", __FILE__, __LINE__, var_to_value);
-                                        }
-                                }
+                                                                if (  Validate_IP(var_to_value) == true )
+                                                                    {
+                                                                        strlcpy(Config->ip, var_to_value, sizeof(Config->ip));
+                                                                    }
+                                                                else
+                                                                    {
+                                                                        Sagan_Log(ERROR, "[%s, line %d] The configuration 'ip' is set to %s which is not a valid IPv4/IPv6 address. Abort", __FILE__, __LINE__, var_to_value);
+                                                                    }
+                                                            }
 
-                            else if ( !strcmp(last_pass, "port" ) )
-                                {
+                                                        else if ( !strcmp(last_pass, "port" ) )
+                                                            {
 
-                                    Config->port = atoi(var_to_value);
+                                                                Config->port = atoi(var_to_value);
 
-                                    if (  Config->port == 0 )
-                                        {
-                                            Sagan_Log(ERROR, "[%s, line %d] The configuration 'port' is set to %s which is not a valid port. Abort", __FILE__, __LINE__, var_to_value);
-                                        }
+                                                                if (  Config->port == 0 )
+                                                                    {
+                                                                        Sagan_Log(ERROR, "[%s, line %d] The configuration 'port' is set to %s which is not a valid port. Abort", __FILE__, __LINE__, var_to_value);
+                                                                    }
 
-                                }
+                                                            }
 
-                            else if ( !strcmp(last_pass, "proto" ) )
-                                {
+                                                        else if ( !strcmp(last_pass, "proto" ) )
+                                                            {
 
-                                    if ( !strcasecmp(var_to_value, "udp") )
-                                        {
-                                            Config->proto[0] = 'U';
-                                            Config->proto[1] = 'D';
-                                            Config->proto[2] = 'P';
-                                            Config->proto[3] = '\0';
+                                                                if ( !strcasecmp(var_to_value, "udp") )
+                                                                    {
+                                                                        Config->proto[0] = 'U';
+                                                                        Config->proto[1] = 'D';
+                                                                        Config->proto[2] = 'P';
+                                                                        Config->proto[3] = '\0';
 
-                                            Config->proto_int = 17;
-                                        }
+                                                                        Config->proto_int = 17;
+                                                                    }
 
-                                    else if ( !strcasecmp(var_to_value, "tcp") )
-                                        {
-                                            Config->proto[0] = 'T';
-                                            Config->proto[1] = 'C';
-                                            Config->proto[2] = 'P';
-                                            Config->proto[3] = '\0';
+                                                                else if ( !strcasecmp(var_to_value, "tcp") )
+                                                                    {
+                                                                        Config->proto[0] = 'T';
+                                                                        Config->proto[1] = 'C';
+                                                                        Config->proto[2] = 'P';
+                                                                        Config->proto[3] = '\0';
 
-                                            Config->proto_int = 6;
-                                        }
+                                                                        Config->proto_int = 6;
+                                                                    }
 
-                                    else if ( !strcasecmp(var_to_value, "icmp") )
-                                        {
-                                            Config->proto[0] = 'I';
-                                            Config->proto[1] = 'C';
-                                            Config->proto[2] = 'M';
-                                            Config->proto[3] = 'P';
-                                            Config->proto[4] = '\0';
+                                                                else if ( !strcasecmp(var_to_value, "icmp") )
+                                                                    {
+                                                                        Config->proto[0] = 'I';
+                                                                        Config->proto[1] = 'C';
+                                                                        Config->proto[2] = 'M';
+                                                                        Config->proto[3] = 'P';
+                                                                        Config->proto[4] = '\0';
 
-                                            Config->proto_int = 1;
-                                        }
+                                                                        Config->proto_int = 1;
+                                                                    }
 
 
-                                    if ( Config->proto_int == 0 )
-                                        {
-                                            Sagan_Log(ERROR, "[%s, line %d] The configuration 'proto' is set to %s which is not a valid. Valid options are UDP, TCP or ICMP. Abort", __FILE__, __LINE__, var_to_value);
-                                        }
+                                                                if ( Config->proto_int == 0 )
+                                                                    {
+                                                                        Sagan_Log(ERROR, "[%s, line %d] The configuration 'proto' is set to %s which is not a valid. Valid options are UDP, TCP or ICMP. Abort", __FILE__, __LINE__, var_to_value);
+                                                                    }
 
-                                }
-			*/
+                                                            }
+                            			*/
 
                             if ( !strcmp(last_pass, "max-threads" ) )
                                 {
@@ -522,15 +522,10 @@ void Load_YAML_Config( const char *yaml_file )
 
                         }
 
-		    else if ( type == YAML_TYPE_RULES )
-			{
-
-			Load_Ruleset( var_to_value );
-
-			}
-
-
-
+                    else if ( type == YAML_TYPE_RULES )
+                        {
+                            Load_Ruleset( var_to_value );
+                        }
 
                     strlcpy(last_pass, var_to_value, sizeof(last_pass));
 
@@ -580,8 +575,8 @@ void Load_YAML_Config( const char *yaml_file )
 
                         } /* tag: var */
 
-		    else if ( !strcmp(value, "rule-files" ))
-			{
+                    else if ( !strcmp(value, "rule-files" ))
+                        {
 
                             if ( Debug->config )
                                 {
@@ -591,8 +586,8 @@ void Load_YAML_Config( const char *yaml_file )
                             type = YAML_TYPE_RULES;
                             toggle = 0;
 
-			}
-			
+                        }
+
 
 
 

@@ -10,9 +10,9 @@ typedef struct _Rules _Rules;
 struct _Rules
 {
 
-	uint64_t signature_id;
-	uint16_t revision;
- 	char description[MAX_RULE_DESCRIPTION];
+    uint64_t signature_id;
+    uint16_t revision;
+    char description[MAX_RULE_DESCRIPTION];
 
 };
 

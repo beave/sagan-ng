@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     int8_t c = 0;
     uint8_t key = 0;
     uint8_t rc = 0;
-    uint16_t i = 0; 
+    uint16_t i = 0;
 
     /* Allocate memory for global struct _Config */
 

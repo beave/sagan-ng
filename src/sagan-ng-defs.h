@@ -21,7 +21,7 @@
 
 #define		MAX_JSON_KEY			512
 #define		MAX_JSON_VALUE			32786
-#define 	MAX_JSON_NEST		        32
+#define 	MAX_JSON_NEST		        1000
 
 #define		MAX_HAYSTACK			32786
 #define		MAX_NEEDLE			512

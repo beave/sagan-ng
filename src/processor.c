@@ -56,12 +56,12 @@ pthread_mutex_t InputWorkMutex;
 void Processor (void)
 {
 
-uint16_t i = 0;
-uint16_t json_count = 0; 
+    uint16_t i = 0;
+    uint16_t json_count = 0;
 
-struct _JSON_Key_String *JSON_Key_String;
+    struct _JSON_Key_String *JSON_Key_String;
 
-JSON_Key_String = malloc(sizeof(_JSON_Key_String) * MAX_JSON_NEST );
+    JSON_Key_String = malloc(sizeof(_JSON_Key_String) * MAX_JSON_NEST );
 
     if ( JSON_Key_String == NULL )
         {
@@ -69,12 +69,12 @@ JSON_Key_String = malloc(sizeof(_JSON_Key_String) * MAX_JSON_NEST );
         }
 
 
-struct _Input_Batch *Input_Batch_LOCAL;
+    struct _Input_Batch *Input_Batch_LOCAL;
 
     Input_Batch_LOCAL = malloc(Config->max_threads * sizeof(_Input_Batch));
 
     if ( Input_Batch_LOCAL == NULL )
-        {   
+        {
             Sagan_Log(ERROR, "[%s, line %d] Failed to allocate memory for _Input_Batch_LOCAL. Abort!", __FILE__, __LINE__);
         }
 
@@ -82,57 +82,57 @@ struct _Input_Batch *Input_Batch_LOCAL;
 
 
 #ifdef HAVE_SYS_PRCTL_H
-(void)SetThreadName("SaganNGProcessor");
+    (void)SetThreadName("SaganNGProcessor");
 #endif
 
-while (Global_Death == false )
-	{
+    while (Global_Death == false )
+        {
 
-	pthread_mutex_lock(&InputWorkMutex);
+            pthread_mutex_lock(&InputWorkMutex);
 
-	while ( processor_message_slot == 0 ) pthread_cond_wait(&InputDoWork, &InputWorkMutex);
+            while ( processor_message_slot == 0 ) pthread_cond_wait(&InputDoWork, &InputWorkMutex);
 
-	processor_message_slot--; 
-	processor_running_threads++; 
+            processor_message_slot--;
+            processor_running_threads++;
 
-	for ( i = 0; i < Config->batch_size; i++ ) 
-		{
-			
-		/* DEBUG STUFF HERE */
+            for ( i = 0; i < Config->batch_size; i++ )
+                {
 
-		strlcpy(Input_Batch_LOCAL[i].input, Input_Batch[i].input, MAX_JSON_SIZE);
-		printf("GOT: %s\n", Input_Batch_LOCAL[i].input);
+                    /* DEBUG STUFF HERE */
 
-		}
+                    strlcpy(Input_Batch_LOCAL[i].input, Input_Batch[i].input, MAX_JSON_SIZE);
+                    printf("GOT: %s\n", Input_Batch_LOCAL[i].input);
 
-	pthread_mutex_unlock(&InputWorkMutex);
+                }
 
-	__atomic_add_fetch(&processor_running_threads, 1, __ATOMIC_SEQ_CST);
+            pthread_mutex_unlock(&InputWorkMutex);
 
-	/* Process LOCAL data */
+            __atomic_add_fetch(&processor_running_threads, 1, __ATOMIC_SEQ_CST);
 
-	printf("DO WORK\n");
+            /* Process LOCAL data */
 
-
-	for ( i = 0; i < Config->batch_size; i++ )
-		{
-
-		json_count = Parse_JSON( Input_Batch_LOCAL[i].input, JSON_Key_String);
-
-		// if json_count == 0, then it wasn't json! */
-
-		printf("%d\n", json_count);
-
-		for (i = 0; i < json_count; i++ )
-			{
-			printf("[%d] Key: %s,  Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
-			}
-
-		}
+            printf("DO WORK\n");
 
 
-	processor_running_threads--;
-	}
+            for ( i = 0; i < Config->batch_size; i++ )
+                {
+
+                    json_count = Parse_JSON( Input_Batch_LOCAL[i].input, JSON_Key_String);
+
+                    // if json_count == 0, then it wasn't json! */
+
+                    printf("%d\n", json_count);
+
+                    for (i = 0; i < json_count; i++ )
+                        {
+                            printf("[%d] Key: %s,  Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
+                        }
+
+                }
+
+
+            processor_running_threads--;
+        }
 
 
 }

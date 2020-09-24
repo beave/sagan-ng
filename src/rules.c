@@ -43,21 +43,21 @@ struct _Rules *Rules = NULL;
 void Load_Ruleset( const char *ruleset )
 {
 
-uint16_t i = 0;
-uint16_t json_count = 0;
+    uint16_t i = 0;
+    uint16_t json_count = 0;
 
-uint16_t line_count = 0; 
+    uint16_t line_count = 0;
 
-char rulebuf[MAX_RULE_SIZE] = { 0 }; 
+    char rulebuf[MAX_RULE_SIZE] = { 0 };
 
-FILE *rulesfile;
+    FILE *rulesfile;
 
-struct _JSON_Key_String *JSON_Key_String;
+    struct _JSON_Key_String *JSON_Key_String;
 
-JSON_Key_String = malloc(sizeof(_JSON_Key_String) * MAX_JSON_NEST );
+    JSON_Key_String = malloc(sizeof(_JSON_Key_String) * MAX_JSON_NEST );
 
     if ( JSON_Key_String == NULL )
-        {   
+        {
             Sagan_Log(ERROR, "[%s, line %d] Failed to allocate memory for _JSON_Key_String", __FILE__, __LINE__);
         }
 
@@ -66,14 +66,14 @@ JSON_Key_String = malloc(sizeof(_JSON_Key_String) * MAX_JSON_NEST );
             Sagan_Log(ERROR, "[%s, line %d] Cannot open rule file (%s - %s)", __FILE__, __LINE__, ruleset, strerror(errno));
         }
 
-	/* Rule set tracking here? */
+    /* Rule set tracking here? */
 
- Sagan_Log(NORMAL, "Loading %s rule file.", ruleset);
+    Sagan_Log(NORMAL, "Loading %s rule file.", ruleset);
 
-  while ( fgets(rulebuf, sizeof(rulebuf), rulesfile) != NULL )
-	{
+    while ( fgets(rulebuf, sizeof(rulebuf), rulesfile) != NULL )
+        {
 
-	    line_count++; 	/* For error displays */
+            line_count++; 	/* For error displays */
 
 
             if (rulebuf[0] == '#' || rulebuf[0] == 10 || rulebuf[0] == ';' || rulebuf[0] == 32)
@@ -98,65 +98,65 @@ JSON_Key_String = malloc(sizeof(_JSON_Key_String) * MAX_JSON_NEST );
 
                 }
 
-	Remove_Return(rulebuf);
+            Remove_Return(rulebuf);
 
 //	printf("|%s|\n", rulebuf);
 
-	json_count = Parse_JSON( rulebuf, JSON_Key_String);
+            json_count = Parse_JSON( rulebuf, JSON_Key_String);
 
-	if ( json_count == 0 )
-		{
-		Sagan_Log(ERROR, "[%s, line %d] Failed to parse rule in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
-		}
+            if ( json_count == 0 )
+                {
+                    Sagan_Log(ERROR, "[%s, line %d] Failed to parse rule in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
+                }
 
-	for ( i = 0; i < json_count; i++ ) 
-		{
+            for ( i = 0; i < json_count; i++ )
+                {
 
-		printf("Key: %s, Value: %s\n", JSON_Key_String[i].key, JSON_Key_String[i].json);
+                    printf("Key: %s, Value: %s\n", JSON_Key_String[i].key, JSON_Key_String[i].json);
 
-		if ( !strcmp( JSON_Key_String[i].key, ".signature_id" ) )
-			{
+                    if ( !strcmp( JSON_Key_String[i].key, ".signature_id" ) )
+                        {
 
-			Rules[Counters->rules].signature_id = atol(JSON_Key_String[i].json);
+                            Rules[Counters->rules].signature_id = atol(JSON_Key_String[i].json);
 
-			if ( Rules[Counters->rules].signature_id == 0 ) 
-				{
-				Sagan_Log(ERROR, "[%s, line %d] Invalid 'signature_id' in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
-				}
+                            if ( Rules[Counters->rules].signature_id == 0 )
+                                {
+                                    Sagan_Log(ERROR, "[%s, line %d] Invalid 'signature_id' in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
+                                }
 
-			}
+                        }
 
-/*
-		else if ( !strcmp( JSON_Key_String[i].key, ".revision" ) )
-			{
+                    /*
+                    		else if ( !strcmp( JSON_Key_String[i].key, ".revision" ) )
+                    			{
 
-			Rules[Counters->rules].revision = atol(JSON_Key_String[i].json);
+                    			Rules[Counters->rules].revision = atol(JSON_Key_String[i].json);
 
-			if ( Rules[Counters->rules].revision == 0 ) 
-				{
-				Sagan_Log(ERROR, "[%s, line %d] Invalid 'revision' in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
-				}
+                    			if ( Rules[Counters->rules].revision == 0 )
+                    				{
+                    				Sagan_Log(ERROR, "[%s, line %d] Invalid 'revision' in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
+                    				}
 
-			}
+                    			}
 
-/*
-		else if ( !strcmp( JSON_Key_String[i].key, ".description" ) )
-			{
-			printf("GOT IT\n");
-			strlcpy( Rules[Counters->rules].description, JSON_Key_String[i].json, MAX_RULE_DESCRIPTION);
+                    /*
+                    		else if ( !strcmp( JSON_Key_String[i].key, ".description" ) )
+                    			{
+                    			printf("GOT IT\n");
+                    			strlcpy( Rules[Counters->rules].description, JSON_Key_String[i].json, MAX_RULE_DESCRIPTION);
 
-			}
-*/
+                    			}
+                    */
 
-		}
-
-
-	}
+                }
 
 
+        }
 
-free(JSON_Key_String);
-fclose(rulesfile);
+
+
+    free(JSON_Key_String);
+    fclose(rulesfile);
 
 }
 

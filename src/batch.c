@@ -40,7 +40,7 @@ struct _Input_Batch *Input_Batch = NULL;
 struct _Config *Config;
 
 uint16_t batch_count = 0;
-uint16_t processor_message_slot = 0; 
+uint16_t processor_message_slot = 0;
 uint16_t processor_running_threads = 0;
 
 //char batch[MAX_BATCH][MAX_JSON_SIZE] = { 0 };
@@ -65,27 +65,27 @@ void Batch( const char *input )
 {
 
     if ( batch_count >= Config->batch_size )
-	{
+        {
 
 //	printf("Send to batch!\n");
 
-	if ( processor_message_slot < Config->max_threads )
-		{
-		printf("Send work\n");
+            if ( processor_message_slot < Config->max_threads )
+                {
+                    printf("Send work\n");
 
-		pthread_mutex_lock(&InputWorkMutex);
+                    pthread_mutex_lock(&InputWorkMutex);
 
-		processor_message_slot++; 
+                    processor_message_slot++;
 
-                pthread_cond_signal(&InputDoWork);
-                pthread_mutex_unlock(&InputWorkMutex);
+                    pthread_cond_signal(&InputDoWork);
+                    pthread_mutex_unlock(&InputWorkMutex);
 
-		}
+                }
 
-	__atomic_store_n (&batch_count, 0, __ATOMIC_SEQ_CST);
+            __atomic_store_n (&batch_count, 0, __ATOMIC_SEQ_CST);
 
 
-	}
+        }
 
     strlcpy(Input_Batch[batch_count].input, input, MAX_JSON_SIZE);
 

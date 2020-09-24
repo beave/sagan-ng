@@ -61,7 +61,7 @@ void Load_Classifications( void )
 
     FILE *classfile;
 
-    char classbuf[128] = { 0 }; 
+    char classbuf[128] = { 0 };
 
     char *saveptr=NULL;
     char *tmptoken=NULL;
@@ -140,12 +140,12 @@ void Load_Classifications( void )
                     Sagan_Log(ERROR, "[%s, line %d] Classification error at line number %d in %s", __FILE__, __LINE__, linecount, Config->classifications_file);
                 }
 
-/*
-            if (debug->debugload)
-                {
-                    Sagan_Log(DEBUG, "[D-%d] Classification: %s|%s|%d", Counters->classifications, Classifications[Counters->classifications].s_shortname, Classifications[Counters->classifications].s_desc, Classifications[Counters->classifications].s_priority);
-                }
-*/
+            /*
+                        if (debug->debugload)
+                            {
+                                Sagan_Log(DEBUG, "[D-%d] Classification: %s|%s|%d", Counters->classifications, Classifications[Counters->classifications].s_shortname, Classifications[Counters->classifications].s_desc, Classifications[Counters->classifications].s_priority);
+                            }
+            */
 
             __atomic_add_fetch(&Counters->classifications, 1, __ATOMIC_SEQ_CST);
 
@@ -164,7 +164,7 @@ void Load_Classifications( void )
 uint16_t Classtype_Lookup( const char *classtype, char *str, size_t size )
 {
 
-    uint16_t i = 0; 
+    uint16_t i = 0;
 
     for (i = 0; i < Counters->classifications; i++)
         {
