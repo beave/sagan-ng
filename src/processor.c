@@ -36,6 +36,8 @@
 
 #include "parsers/json.h"
 
+#include "processors/engine.h"
+
 struct _Config *Config;
 
 bool Global_Death;
@@ -124,10 +126,14 @@ void Processor (void)
                     // normalize/parse_ip first? To add 'keys'
                     // DoEngineHere( JSON_Key_String );
 
-                    for (i = 0; i < json_count; i++ )
-                        {
-                            printf("[%d] Key: %s,  Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
-                        }
+                    Engine( JSON_Key_String, json_count );
+
+                    /*
+                            for (i = 0; i < json_count; i++ )
+                                {
+                                    printf("[%d] Key: %s,  Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
+                                }
+                    */
 
                 }
 

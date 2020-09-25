@@ -46,6 +46,9 @@ void Load_Ruleset( const char *ruleset )
     uint16_t i = 0;
     uint16_t a = 0;
 
+    char tmpkey[MAX_JSON_KEY] = { 0 };
+    uint16_t search_count = 0;
+
     uint16_t json_count = 0;
     uint16_t line_count = 0;
 
@@ -116,7 +119,7 @@ void Load_Ruleset( const char *ruleset )
             for ( i = 0; i < json_count; i++ )
                 {
 
-//                    printf("[%d] Key: %s, Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
+                    printf("[%d] Key: %s, Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
 
 
                     if ( !strcmp( JSON_Key_String[i].key, ".signature_id" ) )
@@ -182,8 +185,6 @@ void Load_Ruleset( const char *ruleset )
             * Get all 'search' optinos
             ****************************************************************/
 
-            char tmpkey[MAX_JSON_KEY] = { 0 };
-
             for ( i = 0; i < json_count; i++ )
                 {
 
@@ -195,9 +196,8 @@ void Load_Ruleset( const char *ruleset )
 
                             if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
                                 {
-                                    strlcpy(Rules[Counters->rules].search_string[Rules->search_string_count], JSON_Key_String[i].json, SEARCH_STRING);
-                                    Rules->search_string_count++; 	/* Got a new "search" */
-
+                                    strlcpy(Rules[Counters->rules].search_string[a], JSON_Key_String[i].json, SEARCH_STRING);
+                                    Rules[Counters->rules].search_string_count++;
                                 }
 
                             snprintf(tmpkey, MAX_JSON_KEY, ".search.%d.parse_key", a);
@@ -205,7 +205,7 @@ void Load_Ruleset( const char *ruleset )
 
                             if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
                                 {
-                                    strlcpy(Rules[Counters->rules].search_key[Rules->search_string_count], JSON_Key_String[i].json, MAX_JSON_KEY);
+                                    strlcpy(Rules[Counters->rules].search_key[a], JSON_Key_String[i].json, MAX_JSON_KEY);
                                 }
 
                             snprintf(tmpkey, MAX_JSON_KEY, ".search.%d.case", a);
@@ -213,8 +213,37 @@ void Load_Ruleset( const char *ruleset )
 
                             if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
                                 {
-                                    Rules[Counters->rules].search_case[Rules->search_string_count] = true;
+
+                                    if ( !strcmp( JSON_Key_String[i].json, "true" ) )
+                                        {
+                                            Rules[Counters->rules].search_case[a] = true;
+                                        }
+
+                                    if ( strcmp( JSON_Key_String[i].json, "true" ) && strcmp( JSON_Key_String[i].json, "false" ) )
+                                        {
+                                            Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'case' of 'true' or 'false'  but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[i].json, ruleset, line_count);
+                                        }
+
                                 }
+
+                            snprintf(tmpkey, MAX_JSON_KEY, ".search.%d.not", a);
+                            tmpkey[ sizeof(tmpkey) - 1] = '\0';
+
+                            if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
+                                {
+
+                                    if ( !strcmp( JSON_Key_String[i].json, "true" ) )
+                                        {
+                                            Rules[Counters->rules].search_not[a] = true;
+                                        }
+
+                                    if ( strcmp( JSON_Key_String[i].json, "true" ) && strcmp( JSON_Key_String[i].json, "false" ) )
+                                        {
+                                            Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'not' of 'true' or 'false'  but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[i].json, ruleset, line_count);
+                                        }
+
+                                }
+
 
                             snprintf(tmpkey, MAX_JSON_KEY, ".search.%d.type", a);
                             tmpkey[ sizeof(tmpkey) - 1] = '\0';
@@ -224,21 +253,20 @@ void Load_Ruleset( const char *ruleset )
 
                                     if ( !strcmp( JSON_Key_String[i].json, "exact" ) )
                                         {
-                                            Rules[Counters->rules].search_type[Rules->search_string_count] = SEARCH_TYPE_EXACT;
+                                            Rules[Counters->rules].search_type[a] = SEARCH_TYPE_EXACT;
                                         }
 
                                     if ( !strcmp( JSON_Key_String[i].json, "contains" ) )
                                         {
-                                            Rules[Counters->rules].search_type[Rules->search_string_count] = SEARCH_TYPE_CONTAINS;
+                                            Rules[Counters->rules].search_type[a] = SEARCH_TYPE_CONTAINS;
                                         }
 
-                                    if ( strcmp( JSON_Key_String[i].json, "contains" ) && strcmp( JSON_Key_String[i].json, "exact" ) )
+                                    if ( strcmp( JSON_Key_String[i].json, "exact" ) && strcmp( JSON_Key_String[i].json, "contains" ) )
                                         {
-                                            Sagan_Log(ERROR, "[%s, line %d] Error: 'search' option 'type' of '%s' in %s at line %d is invalid.  This must be 'exact' or 'contains'. Abort.", __FILE__, __LINE__, JSON_Key_String[i].json, ruleset, line_count);
+                                            Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'type' of 'exact' or 'contains' but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[i].json, ruleset, line_count);
                                         }
 
                                 }
-
                         }
 
                 }
@@ -248,11 +276,10 @@ void Load_Ruleset( const char *ruleset )
             for ( a = 0; a < Rules->search_string_count; a++ )
                 {
 
-                    if ( Rules[Counters->rules].search_key[a] == '\0' )
+                    if ( Rules[Counters->rules].search_key[a][0] == '\0' )
                         {
                             Sagan_Log(ERROR, "[%s, line %d] Error: `search` option lacks a 'parse_key` option in %s at line %d. Abort.", __FILE__, __LINE__, ruleset, line_count);
                         }
-
                 }
 
 

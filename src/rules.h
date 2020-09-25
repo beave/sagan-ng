@@ -31,6 +31,7 @@ struct _Rules
     char search_key[MAX_RULE_SEARCH][MAX_JSON_KEY];
     bool search_type[MAX_RULE_SEARCH];
     bool search_case[MAX_RULE_SEARCH];
+    bool search_not[MAX_RULE_SEARCH];
     uint8_t search_string_count;
 
 
