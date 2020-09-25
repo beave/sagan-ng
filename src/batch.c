@@ -71,7 +71,7 @@ void Batch( const char *input )
 
             if ( processor_message_slot < Config->max_threads )
                 {
-                    printf("Send work\n");
+//                    printf("Send work\n");
 
                     pthread_mutex_lock(&InputWorkMutex);
 

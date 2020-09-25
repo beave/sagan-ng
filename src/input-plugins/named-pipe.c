@@ -126,11 +126,8 @@ void Input_Named_Pipe(void)
 #endif
                                 }
 
+                            /* Send incoming message to queue/batch */
 
-                            // SEND TO BATCH!
-
-//                           printf("----------------------------------------------------\n");
-//                            printf("send to queue: %s\n", input );
                             Batch( input );
 
                         } /* while(fgets) */

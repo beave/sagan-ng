@@ -588,15 +588,9 @@ void Load_YAML_Config( const char *yaml_file )
 
                         }
 
-
-
-
                 } /* End of "while */
 
         }
-
-    printf("%d\n", Counters->var);
-    printf("%s\n", Config->reference_file);
 
     yaml_parser_delete(&parser);
     fclose(fh);
