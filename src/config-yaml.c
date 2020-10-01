@@ -1,8 +1,8 @@
 
 /* NOTES:
 
-   SENSOR AND CLSUTER NOT BEING PARSED!
-   NO DEFAULTS BEING SET
+   NO DEFAULTS BEING SET.  Check things like "is cluster name" there?  More
+   sanity checks
 
 */
 
@@ -416,6 +416,8 @@ void Load_YAML_Config( const char *yaml_file )
                                 {
                                     strlcpy(Config->classifications_file, var_to_value, sizeof(Config->classifications_file));
                                     Remove_Return(Config->classifications_file);
+                                    Load_Classifications();
+
                                 }
 
                             else if ( !strcmp(last_pass, "reference" ) )
@@ -450,6 +452,21 @@ void Load_YAML_Config( const char *yaml_file )
                                     Remove_Return(Config->runas);
                                 }
 
+                            else if ( !strcmp(last_pass, "sensor-name" ) )
+                                {
+                                    strlcpy(Config->sensor_name, var_to_value, MAX_SENSOR_NAME);
+                                    Remove_Return(Config->sensor_name);
+                                }
+
+                            else if ( !strcmp(last_pass, "cluster-name" ) )
+                                {
+                                    strlcpy(Config->cluster_name, var_to_value, MAX_CLUSTER_NAME);
+                                    Remove_Return(Config->cluster_name);
+                                }
+
+
+
+
                         }
 
                     /* Types with sub-types */
@@ -464,8 +481,21 @@ void Load_YAML_Config( const char *yaml_file )
 
                         }
 
+                    else if ( type == YAML_TYPE_OUTPUT )
+                        {
 
-                    /* Sub types ! */
+                            if ( !strcmp(value, "file") )
+                                {
+                                    sub_type = YAML_SUBTYPE_OUTPUT_FILE;
+                                }
+
+                        }
+
+
+
+                    /********************************************************
+                             * Sub types ! - Input
+                     ********************************************************/
 
                     if ( sub_type == YAML_SUBTYPE_INPUT_PIPE && type == YAML_TYPE_INPUT )
                         {
@@ -474,7 +504,7 @@ void Load_YAML_Config( const char *yaml_file )
                                 {
                                     if (!strcasecmp(value, "yes") || !strcasecmp(value, "true") || !strcasecmp(value, "enabled") )
                                         {
-                                            Config->named_pipe_flag = true;
+                                            Config->input_named_pipe_flag = true;
                                         }
                                 }
 
@@ -482,36 +512,36 @@ void Load_YAML_Config( const char *yaml_file )
                                 {
                                     if (!strcasecmp(value, "yes") || !strcasecmp(value, "true") || !strcasecmp(value, "enabled") )
                                         {
-                                            Config->named_pipe_chown = true;
+                                            Config->input_named_pipe_chown = true;
                                         }
                                 }
 
 
-                            else if ( !strcmp(last_pass, "named-pipe" ) && Config->named_pipe_flag == true )
+                            else if ( !strcmp(last_pass, "named-pipe" ) && Config->input_named_pipe_flag == true )
                                 {
-                                    strlcpy(Config->named_pipe, var_to_value, sizeof(Config->named_pipe));
-                                    Remove_Return(Config->named_pipe);
+                                    strlcpy(Config->input_named_pipe, var_to_value, sizeof(Config->input_named_pipe));
+                                    Remove_Return(Config->input_named_pipe);
                                 }
 
 
 
 #if defined(HAVE_GETPIPE_SZ) && defined(HAVE_SETPIPE_SZ)
 
-                            else if ( !strcmp(last_pass, "size" ) && Config->named_pipe_flag == true )
+                            else if ( !strcmp(last_pass, "size" ) && Config->input_named_pipe_flag == true )
                                 {
 
-                                    Config->named_pipe_size = atoi( var_to_value );
+                                    Config->input_named_pipe_size = atoi( var_to_value );
 
-                                    if ( Config->named_pipe_size == 0 )
+                                    if ( Config->input_named_pipe_size == 0 )
                                         {
                                             Sagan_Log(ERROR, "[%s, line %d] input -> named_pipe has a bad pipe size value of %s. Abort!",  __FILE__, __LINE__, var_to_value);
                                         }
 
-                                    if ( Config->named_pipe_size != 65536 &&
-                                            Config->named_pipe_size != 131072 &&
-                                            Config->named_pipe_size != 262144 &&
-                                            Config->named_pipe_size != 524288 &&
-                                            Config->named_pipe_size != 1048576 )
+                                    if ( Config->input_named_pipe_size != 65536 &&
+                                            Config->input_named_pipe_size != 131072 &&
+                                            Config->input_named_pipe_size != 262144 &&
+                                            Config->input_named_pipe_size != 524288 &&
+                                            Config->input_named_pipe_size != 1048576 )
                                         {
                                             Sagan_Log(ERROR, "[%s, line %d] input -> named_pipe has a bad pipe size value of %s. The size can only be 65536, 131072, 262144, 524288, or 1048576. Abort!",  __FILE__, __LINE__, var_to_value);
                                         }
@@ -521,6 +551,45 @@ void Load_YAML_Config( const char *yaml_file )
 #endif
 
                         }
+
+                    /********************************************************
+                     * Sub types ! - Input
+                     ********************************************************/
+
+                    if ( sub_type == YAML_SUBTYPE_OUTPUT_FILE && type == YAML_TYPE_OUTPUT )
+                        {
+
+                            if ( !strcmp(last_pass, "enabled" ))
+                                {
+                                    if (!strcasecmp(value, "yes") || !strcasecmp(value, "true") || !strcasecmp(value, "enabled") )
+                                        {
+                                            Config->output_file_flag = true;
+                                        }
+                                }
+
+                            if ( !strcmp(last_pass, "output-file" ))
+                                {
+                                    strlcpy(Config->output_file, var_to_value, MAX_PATH);
+                                }
+
+                            if ( !strcmp(last_pass, "flatten-json" ))
+                                {
+                                    if (!strcasecmp(value, "yes") || !strcasecmp(value, "true") || !strcasecmp(value, "enabled") )
+                                        {
+                                            Config->output_file_flatten_json = true;
+                                        }
+                                }
+
+                            if ( !strcmp(last_pass, "append-alert-data" ))
+                                {
+                                    if (!strcasecmp(value, "yes") || !strcasecmp(value, "true") || !strcasecmp(value, "enabled") )
+                                        {
+                                            Config->output_file_append_alert_data = true;
+                                        }
+                                }
+
+                        }
+
 
                     else if ( type == YAML_TYPE_RULES )
                         {
@@ -573,7 +642,20 @@ void Load_YAML_Config( const char *yaml_file )
                             type = YAML_TYPE_INPUT;
                             toggle = 0;
 
-                        } /* tag: var */
+                        } /* tag: input */
+
+                    else if (!strcmp(value, "output"))
+                        {
+
+                            if ( Debug->config )
+                                {
+                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found \"output\" ****", __FILE__, __LINE__);
+                                }
+
+                            type = YAML_TYPE_OUTPUT;
+                            toggle = 0;
+
+                        } /* tag: output */
 
                     else if ( !strcmp(value, "rule-files" ))
                         {

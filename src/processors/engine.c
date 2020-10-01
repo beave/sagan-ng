@@ -57,20 +57,17 @@ bool results = false;
 		if ( Rules[rule_position].search_string_count != 0 ) 
 			{
 			results = Search ( rule_position, json_count, JSON_Key_String); 
-			printf("Results: %d\n", results);
 			}
 
+	
+	if ( results == true ) 
+		{
+		printf("Fire event!\n");
+		Output( JSON_Key_String, json_count, rule_position );
+		}
 
-
+	printf("Results: %d\n", results);
 	}
-
-/*
-                    for (i = 0; i < json_count; i++ )
-                        {
-                            printf("[%d] Key: %s,  Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
-                        }
-
-*/
 
 
 }

@@ -42,6 +42,7 @@
 #include "sagan-ng.h"
 #include "sagan-ng-defs.h"
 #include "sagan-config.h"
+#include "rules.h"
 #include "classifications.h"
 #include "counters.h"
 #include "debug.h"
@@ -54,9 +55,7 @@ struct _Config *Config;
 struct _Classifications *Classifications = NULL;
 
 
-//void Load_Classifications( const char *cfile )
 void Load_Classifications( void )
-
 {
 
     FILE *classfile;
@@ -114,7 +113,7 @@ void Load_Classifications( void )
                 }
 
             Remove_Spaces(laststring);
-            strlcpy(Classifications[Counters->classifications].s_shortname, laststring, sizeof(Classifications[Counters->classifications].s_shortname));
+            strlcpy(Classifications[Counters->classifications].shortname, laststring, sizeof(Classifications[Counters->classifications].shortname));
 
             laststring = strtok_r(NULL, ",", &saveptr);
 
@@ -123,7 +122,7 @@ void Load_Classifications( void )
                     Sagan_Log(ERROR, "[%s, line %d] The file %s at line %d is improperly formated. Abort!", __FILE__, __LINE__, Config->classifications_file, linecount);
                 }
 
-            strlcpy(Classifications[Counters->classifications].s_desc, laststring, sizeof(Classifications[Counters->classifications].s_desc));
+            strlcpy(Classifications[Counters->classifications].desc, laststring, sizeof(Classifications[Counters->classifications].desc));
 
             laststring = strtok_r(NULL, ",", &saveptr);
 
@@ -133,9 +132,9 @@ void Load_Classifications( void )
                 }
 
             strlcpy(tmpbuf2, laststring, sizeof(tmpbuf2));
-            Classifications[Counters->classifications].s_priority=atoi(tmpbuf2);
+            Classifications[Counters->classifications].priority=atoi(tmpbuf2);
 
-            if ( Classifications[Counters->classifications].s_priority == 0 )
+            if ( Classifications[Counters->classifications].priority == 0 )
                 {
                     Sagan_Log(ERROR, "[%s, line %d] Classification error at line number %d in %s", __FILE__, __LINE__, linecount, Config->classifications_file);
                 }
@@ -143,7 +142,7 @@ void Load_Classifications( void )
             /*
                         if (debug->debugload)
                             {
-                                Sagan_Log(DEBUG, "[D-%d] Classification: %s|%s|%d", Counters->classifications, Classifications[Counters->classifications].s_shortname, Classifications[Counters->classifications].s_desc, Classifications[Counters->classifications].s_priority);
+                                Sagan_Log(DEBUG, "[D-%d] Classification: %s|%s|%d", Counters->classifications, Classifications[Counters->classifications].shortname, Classifications[Counters->classifications].desc, Classifications[Counters->classifications].priority);
                             }
             */
 
@@ -158,10 +157,10 @@ void Load_Classifications( void )
 
 /****************************************************************************
  * Classtype_Lookup - Simple routine that looks up the classtype
- * (s_shortname) and returns the classtype's description
+ * (shortname) and returns the classtype's description
  ****************************************************************************/
-/*
-uint16_t Classtype_Lookup( const char *classtype, char *str, size_t size )
+
+int16_t Classtype_Lookup( const char *classtype, char *str, size_t size )
 {
 
     uint16_t i = 0;
@@ -169,16 +168,15 @@ uint16_t Classtype_Lookup( const char *classtype, char *str, size_t size )
     for (i = 0; i < Counters->classifications; i++)
         {
 
-            if (!strcmp(classtype, Classifications[i].s_shortname))
+            if (!strcmp(classtype, Classifications[i].shortname))
                 {
-                    snprintf(str, size, "%s", classstruct[i].s_desc);
+                    snprintf(str, size, "%s", Classifications[i].desc);
                     return 0;
                 }
         }
 
-
     snprintf(str, sizeof("UNKNOWN"), "UNKNOWN");
     return -1;
 }
-*/
+
 

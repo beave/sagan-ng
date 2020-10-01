@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
 ** Copyright (C) 2009-2020 Quadrant Information Security <quadrantsec.com>
 ** Copyright (C) 2009-2020 Champ Clark III <cclark@quadrantsec.com>
@@ -18,38 +19,42 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/************************/
-/* Minimum YAML version */
-/************************/
+#ifdef HAVE_CONFIG_H
+#include "config.h"             /* From autoconf */
+#endif
 
-#define YAML_VERSION_MAJOR 1
-#define YAML_VERSION_MINOR 1
+#include <stdio.h>
+#include <stdlib.h>
 
-/*****************/
-/* Primary types */
-/*****************/
+#include "sagan-ng-defs.h"
+#include "sagan-ng.h"
+#include "sagan-config.h"
 
-#define		YAML_TYPE_VAR		1
-#define         YAML_TYPE_CORE          2
-#define		YAML_TYPE_INPUT		3
-#define         YAML_TYPE_OUTPUT        4
-#define		YAML_TYPE_PROCESSORS	5
-#define		YAML_TYPE_RULES		6
-#define		YAML_TYPE_INCLUDES	7
+#include "parsers/json.h"
 
-/*************/
-/* Sub Types */
-/*************/
+#include "output.h"
+#include "output-plugins/file.h"
 
-#define		YAML_SUBTYPE_INPUT_PIPE		1
+struct _Config *Config;
 
-/**********************/
-/* Sub type - outputs */
-/**********************/
+void Init_Output ( void )
+{
 
-#define		YAML_SUBTYPE_OUTPUT_FILE	1
+    if ( Config->output_file_flag == true )
+        {
+            File_Init();
+        }
 
 
+}
 
-void Load_YAML_Config( const char * );
+void Output( struct _JSON_Key_String *JSON_Key_String, uint16_t json_count, uint32_t rule_position )
+{
 
+    if ( Config->output_file_flag == true )
+        {
+//		printf("**** FIRE ****** on %s:%s\n", Config->sensor_name, Config->cluster_name);
+            File( JSON_Key_String, json_count, rule_position );
+        }
+
+}

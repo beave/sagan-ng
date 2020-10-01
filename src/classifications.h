@@ -22,18 +22,16 @@
 #include "config.h"             /* From autoconf */
 #endif
 
-
 /* Classification strucure */
 
 typedef struct _Classifications _Classifications;
 struct _Classifications
 {
-    char s_shortname[32];
-    char s_desc[96];
-    uint8_t  s_priority;
+    char shortname[MAX_RULE_CLASSIFICATION];
+    char desc[MAX_RULE_CLASSIFICATION_DESC];
+    uint8_t priority;
 };
 
 void Load_Classifications( void );
-//void Load_Classifications( const char * );
-//int  Classtype_Lookup( const char *classtype, char *str, size_t size );
+int16_t Classtype_Lookup( const char *classtype, char *str, size_t size );
 

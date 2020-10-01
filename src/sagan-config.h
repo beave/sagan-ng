@@ -27,6 +27,10 @@ struct _Config
 //    char		proto[5];
 //    unsigned char	proto_int;
 //    uint32_t            port;
+
+    char		sensor_name[MAX_SENSOR_NAME];
+    char		cluster_name[MAX_CLUSTER_NAME];
+
     uint32_t		max_threads;
     unsigned char	batch_size;
     char	        classifications_file[MAX_PATH];
@@ -40,15 +44,21 @@ struct _Config
 
     /* named pipe */
 
-    bool named_pipe_flag;
-    char named_pipe[MAX_PATH];
-    uint32_t named_pipe_size;
-    bool named_pipe_chown;
+    bool input_named_pipe_flag;
+    char input_named_pipe[MAX_PATH];
+    uint32_t input_named_pipe_size;
+    bool input_named_pipe_chown;
 
 
+    /***********************************************************************/
+    /* Output                                                              */
+    /***********************************************************************/
 
-
-
+    bool output_file_flag;
+    char output_file[MAX_PATH];
+    bool output_file_flatten_json;
+    bool output_file_append_alert_data;
+    FILE *output_file_stream;
 
 
 

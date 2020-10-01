@@ -9,7 +9,8 @@
 ** distribute this program under any other version of the GNU General
 ** Public License.
 **
-** This program is distributed in the hope that it will be useful,                                           ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
@@ -153,7 +154,15 @@ void Load_Ruleset( const char *ruleset )
 
                     else if ( !strcmp( JSON_Key_String[i].key, ".classification" ) )
                         {
+
                             strlcpy( Rules[Counters->rules].classification, JSON_Key_String[i].json, MAX_RULE_CLASSIFICATION);
+
+                            if ( Classtype_Lookup( Rules[Counters->rules].classification, Rules[Counters->rules].classification_desc, MAX_RULE_CLASSIFICATION_DESC ) == -1 )
+                                {
+                                    Sagan_Log(ERROR, "[%s, line %d] Error: Could find classification of '%s' in %s at line %d. Abort.", __FILE__, __LINE__, Rules[Counters->rules].classification, ruleset, line_count);
+                                }
+
+
                         }
 
                     else if ( !strcmp( JSON_Key_String[i].key, ".normalize" ) )

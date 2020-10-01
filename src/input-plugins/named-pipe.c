@@ -62,15 +62,15 @@ void Input_Named_Pipe_Init(void)
 
     uint8_t ret = 0;
 
-    if ( Config->named_pipe_chown == true )
+    if ( Config->input_named_pipe_chown == true )
         {
-            Sagan_Log(NORMAL, "Changing FIFO '%s' ownership to '%s'.", Config->named_pipe, Config->runas);
+            Sagan_Log(NORMAL, "Changing FIFO '%s' ownership to '%s'.", Config->input_named_pipe, Config->runas);
 
-            ret = chown(Config->named_pipe, (unsigned long)pw->pw_uid,(unsigned long)pw->pw_gid);
+            ret = chown(Config->input_named_pipe, (unsigned long)pw->pw_uid,(unsigned long)pw->pw_gid);
 
             if ( ret < 0 )
                 {
-                    Sagan_Log(ERROR, "[%s, line %d] Cannot change ownership of %s to username \"%s\" - %s", __FILE__, __LINE__, Config->named_pipe, Config->runas, strerror(errno));
+                    Sagan_Log(ERROR, "[%s, line %d] Cannot change ownership of %s to username \"%s\" - %s", __FILE__, __LINE__, Config->input_named_pipe, Config->runas, strerror(errno));
                 }
 
         }
@@ -95,12 +95,12 @@ void Input_Named_Pipe(void)
     while( Global_Death == false )
         {
 
-            if (( fd = fopen(Config->named_pipe, "r" )) == NULL )
+            if (( fd = fopen(Config->input_named_pipe, "r" )) == NULL )
                 {
-                    Sagan_Log(ERROR, "[%s, line %d] Cannot open %s. %s.", __FILE__, __LINE__, Config->named_pipe, strerror(errno));
+                    Sagan_Log(ERROR, "[%s, line %d] Cannot open %s. %s.", __FILE__, __LINE__, Config->input_named_pipe, strerror(errno));
                 }
 
-            Sagan_Log(NORMAL, "Successfully opened named pipe (%s).", Config->named_pipe);
+            Sagan_Log(NORMAL, "Successfully opened named pipe (%s).", Config->input_named_pipe);
 
 #if defined(HAVE_GETPIPE_SZ) && defined(HAVE_SETPIPE_SZ)
             Set_Pipe_Size(fd);

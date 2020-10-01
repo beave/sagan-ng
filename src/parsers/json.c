@@ -56,7 +56,7 @@ uint16_t Parse_JSON ( const char *input, struct _JSON_Key_String *JSON_Key_Strin
     struct json_object_iterator itEnd;
 
     char new_key[MAX_JSON_KEY] = { 0 };
-    char tmp_key[MAX_JSON_VALUE] = { 0 };
+    char tmp_key[MAX_JSON_KEY] = { 0 };
 
     const char *key = NULL;
     const char *val_str = NULL;
@@ -96,7 +96,7 @@ uint16_t Parse_JSON ( const char *input, struct _JSON_Key_String *JSON_Key_Strin
                                     snprintf(JSON_Key_String[json_count].key, sizeof(JSON_Key_String[json_count].key), "%s.%s", JSON_Key_String[i].key, key);
                                     JSON_Key_String[json_count].key[ sizeof(JSON_Key_String[json_count].key) - 1] = '\0';
 
-                                    strcpy(JSON_Key_String[json_count].json, val_str);
+                                    strlcpy(JSON_Key_String[json_count].json, val_str, MAX_JSON_VALUE );
                                     json_count++;
 
                                     json_object_iter_next(&it);

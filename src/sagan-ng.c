@@ -1,3 +1,14 @@
+/*
+
+Notes:
+
+When using "exact", leading spaces get stripped.  So "   champtest" when searching
+for "champtest" will get a hit.  But "this is a champtest" still won't
+
+*/
+
+
+
 /* $Id$ */
 /*
 ** Copyright (C) 2009-2020 Quadrant Information Security <quadrantsec.com>
@@ -48,19 +59,14 @@
 #include "signal-handler.h"
 #include "processor.h"
 #include "batch.h"
-#include "classifications.h"
 #include "rules.h"
+#include "classifications.h"
 
+#include "parsers/json.h"
 
 #include "input-plugins/named-pipe.h"
 
-/* Notes:
-
-   Command line...  (need --config option)
-   Move *Config array to config-yaml.c? Or at least clear it there?
-   Signal Handler
-
-*/
+#include "output-plugins/file.h"
 
 struct _Config *Config = NULL;
 struct _Counters *Counters = NULL;
@@ -305,7 +311,9 @@ int main(int argc, char **argv)
 
     CheckLockFile();
 
-    Load_Classifications();
+    /* Init _Output_ */
+
+    Init_Output();
 
 //    Droppriv();              /* Become the Sagan user */
 
@@ -350,10 +358,9 @@ int main(int argc, char **argv)
                 }
         }
 
+    /* Spawn _input_ threads */
 
-    /* Spawn threads here */
-
-    if ( Config->named_pipe_flag == true )
+    if ( Config->input_named_pipe_flag == true )
         {
 
             pthread_t named_pipe_thread;

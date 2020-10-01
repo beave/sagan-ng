@@ -267,31 +267,31 @@ void Set_Pipe_Size ( FILE *fd )
     int fd_results;
 
 
-    if ( Config->named_pipe_size != 0 )
+    if ( Config->input_named_pipe_size != 0 )
         {
 
             fd_int = fileno(fd);
             current_fifo_size = fcntl(fd_int, F_GETPIPE_SZ);
 
-            if ( current_fifo_size == Config->named_pipe_size )
+            if ( current_fifo_size == Config->input_named_pipe_size )
                 {
 
-                    Sagan_Log(NORMAL, "Named pipe capacity already set to %d bytes.", Config->named_pipe_size);
+                    Sagan_Log(NORMAL, "Named pipe capacity already set to %d bytes.", Config->input_named_pipe_size);
 
                 }
             else
                 {
 
-                    Sagan_Log(NORMAL, "Named pipe capacity is %d bytes.  Changing to %d bytes.", current_fifo_size, Config->named_pipe_size);
+                    Sagan_Log(NORMAL, "Named pipe capacity is %d bytes.  Changing to %d bytes.", current_fifo_size, Config->input_named_pipe_size);
 
-                    fd_results = fcntl(fd_int, F_SETPIPE_SZ, Config->named_pipe_size );
+                    fd_results = fcntl(fd_int, F_SETPIPE_SZ, Config->input_named_pipe_size );
 
                     if ( fd_results == -1 )
                         {
                             Sagan_Log(WARN, "Named pipe capacity could not be changed.  Continuing anyways...");
                         }
 
-                    if ( fd_results > Config->named_pipe_size )
+                    if ( fd_results > Config->input_named_pipe_size )
                         {
                             Sagan_Log(WARN, "Named pipe  capacity was rounded up to the next page size of %d bytes.", fd_results);
                         }

@@ -50,6 +50,7 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
     for ( i = 0; i < Rules[rule_position].search_string_count; i++ )
         {
 
+
             for ( a = 0; a < json_count; a++ )
                 {
 
@@ -76,10 +77,7 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
                                                     return(false);
                                                 }
 
-
                                         }
-
-
 
                                 }
 
@@ -103,6 +101,7 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
 
                                             if ( Search_Case(JSON_Key_String[a].json, Rules[rule_position].search_string[i], Rules[rule_position].search_type[i]) == true )
                                                 {
+
                                                     return(false);
                                                 }
 
@@ -116,13 +115,11 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
 
                 }
 
-//	printf("Search: %s\n", Rules[rule_position].search_string[i]);
-//	printf("Key: %s\n", Rules[rule_position].search_key[i]);
-
         }
 
+    /* If everything lines up,  we have a full json_content match */
 
-
+    return(true);
 
 }
 

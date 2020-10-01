@@ -1,12 +1,14 @@
 
-#define         VALID_RULE_OPTIONS "signature_id"
 
+#include "sagan-ng-defs.h"
+
+#define         VALID_RULE_OPTIONS "signature_id"
 
 #define         MAX_RULE_SIZE                   4096
 #define		MAX_RULE_DESCRIPTION		256
 #define		MAX_RULE_CLASSIFICATION		32
+#define         MAX_RULE_CLASSIFICATION_DESC    96
 #define		MAX_RULE_REFERENCE		2048
-
 #define		MAX_RULE_SEARCH			25
 
 #define		SEARCH_STRING			128
@@ -24,6 +26,7 @@ struct _Rules
     uint16_t revision;
     char description[MAX_RULE_DESCRIPTION];
     char classification[MAX_RULE_CLASSIFICATION];
+    char classification_desc[MAX_RULE_CLASSIFICATION_DESC];
     char normalize[MAX_JSON_KEY];
     char reference[MAX_RULE_REFERENCE];
 
