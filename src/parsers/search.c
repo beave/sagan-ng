@@ -31,8 +31,8 @@
 #include "util.h"
 #include "rules.h"
 #include "counters.h"
-
 #include "parsers/json.h"
+#include "parsers/search.h"
 
 #include "processors/engine.h"
 
@@ -46,76 +46,90 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
     uint8_t i = 0;
     uint16_t a = 0;
 
-
     for ( i = 0; i < Rules[rule_position].search_string_count; i++ )
         {
-
 
             for ( a = 0; a < json_count; a++ )
                 {
 
-                    if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].search_key[i]) )
+                    if ( Rules[rule_position].search_not[i] == false )
                         {
 
-                            if ( Rules[rule_position].search_case[i] == false )
+                            if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].search_key[i]) )
                                 {
 
-                                    if ( Rules[rule_position].search_not[i] == false )
+                                    if ( Rules[rule_position].search_case[i] == false )
                                         {
 
-                                            if ( Search_Nocase(JSON_Key_String[a].json, Rules[rule_position].search_string[i], false, Rules[rule_position].search_type[i] ) == false  )
+                                            /* Case _insensitive_ search */
+
+                                            if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
                                                 {
-                                                    return(false);
+
+                                                    /* Search type is "contains" */
+
+                                                    if ( !Sagan_stristr( JSON_Key_String[a].json, Rules[rule_position].search_string[i], true ) )
+                                                        {
+                                                            return(false);
+                                                        }
+
+                                                }
+                                            else
+                                                {
+
+                                                    /* Search type is "exact" */
+
+                                                    if ( strcasecmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i] ) )
+                                                        {
+                                                            return(false);
+                                                        }
+
                                                 }
 
                                         }
                                     else
                                         {
 
-                                            if ( Search_Nocase(JSON_Key_String[a].json, Rules[rule_position].search_string[i], false, Rules[rule_position].search_type[i] ) == true )
-                                                {
-                                                    return(false);
-                                                }
+                                            /* Case sensitive */
 
-                                        }
-
-                                }
-
-                            else
-
-                                {
-
-                                    /* Case sensitive */
-
-                                    if ( Rules[rule_position].search_not[i] == false )
-                                        {
-
-                                            if ( Search_Case(JSON_Key_String[a].json, Rules[rule_position].search_string[i], Rules[rule_position].search_type[i]) ==  false )
-                                                {
-                                                    return(false);
-                                                }
-
-                                        }
-                                    else
-                                        {
-
-                                            if ( Search_Case(JSON_Key_String[a].json, Rules[rule_position].search_string[i], Rules[rule_position].search_type[i]) == true )
+                                            if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
                                                 {
 
-                                                    return(false);
-                                                }
+                                                    /* Rule type is "contains" */
 
+                                                    if ( !Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i] ) )
+                                                        {
+                                                            return(false);
+                                                        }
+
+                                                }
+                                            else
+                                                {
+
+                                                    /* Rule type is "exact */
+
+                                                    if ( strcmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i] ) )
+                                                        {
+                                                            return(false);
+                                                        }
+
+                                                }
                                         }
 
+                                } /* strcmp(JSON_Key_String[a].key ... */
 
-                                }
-                        }
+                        } else {  /* Rules[rule_position].search_not[i] == false */
+
+				printf("GOT NOT RULE\n");
 
 
+				}
+			
 
-                }
+                } /* for ( a = 0; a < json_count; a++ ) */
 
-        }
+        } /* for ( i = 0; i < Rules[rule_position].search_string_count */
+
 
     /* If everything lines up,  we have a full json_content match */
 

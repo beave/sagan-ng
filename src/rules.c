@@ -46,6 +46,7 @@ void Load_Ruleset( const char *ruleset )
 
     uint16_t i = 0;
     uint16_t a = 0;
+//    uint8_t z = 0; 
 
     char tmpkey[MAX_JSON_KEY] = { 0 };
     uint16_t search_count = 0;
@@ -191,11 +192,16 @@ void Load_Ruleset( const char *ruleset )
 
 
             /****************************************************************
-            * Get all 'search' optinos
+            * Get all 'search'/'exclude' optinos
             ****************************************************************/
 
+//    for ( z = 0; z < 2; z++ ) 
+//		{
+
+//	    printf("z: %d\n", z);
+
             for ( i = 0; i < json_count; i++ )
-                {
+               {
 
                     for ( a = 0; a < MAX_RULE_SEARCH; a++ )
                         {
@@ -209,7 +215,7 @@ void Load_Ruleset( const char *ruleset )
                                     Rules[Counters->rules].search_string_count++;
                                 }
 
-                            snprintf(tmpkey, MAX_JSON_KEY, ".search.%d.parse_key", a);
+                            snprintf(tmpkey, MAX_JSON_KEY, ".search.%d.key", a);
                             tmpkey[ sizeof(tmpkey) - 1] = '\0';
 
                             if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
@@ -278,7 +284,9 @@ void Load_Ruleset( const char *ruleset )
                                 }
                         }
 
-                }
+//                }
+
+	    }
 
             /* Sanity Check! */
 
@@ -287,12 +295,13 @@ void Load_Ruleset( const char *ruleset )
 
                     if ( Rules[Counters->rules].search_key[a][0] == '\0' )
                         {
-                            Sagan_Log(ERROR, "[%s, line %d] Error: `search` option lacks a 'parse_key` option in %s at line %d. Abort.", __FILE__, __LINE__, ruleset, line_count);
+                            Sagan_Log(ERROR, "[%s, line %d] Error: `search` option lacks a 'key' option in %s at line %d. Abort.", __FILE__, __LINE__, ruleset, line_count);
                         }
                 }
 
 
             __atomic_add_fetch(&Counters->rules, 1, __ATOMIC_SEQ_CST);
+
 
         } /* while ( fgets(rulebuf .... */
 

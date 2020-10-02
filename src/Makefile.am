@@ -22,7 +22,6 @@ AUTOMAKE_OPIONS=foreign no-dependencies subdir-objects
 						       output.c \
 					               parsers/json.c \
 						       parsers/search.c \
-						       parsers/search-case.c \
                                                        parsers/strstr-asm/strstr-hook.c \
                                                        parsers/strstr-asm/strstr_sse2.S \
                                                        parsers/strstr-asm/strstr_sse4_2.S \
