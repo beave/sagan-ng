@@ -262,10 +262,9 @@ void Droppriv(void)
 void Set_Pipe_Size ( FILE *fd )
 {
 
-    int fd_int;
-    int current_fifo_size;
-    int fd_results;
-
+    uint8_t fd_int = 0;
+    uint16_t current_fifo_size = 0;
+    int8_t fd_results = 0;
 
     if ( Config->input_named_pipe_size != 0 )
         {
@@ -300,4 +299,136 @@ void Set_Pipe_Size ( FILE *fd )
 }
 
 #endif
+
+
+void Between_Quotes(const char *in_str, char *str, size_t size)
+{
+    bool flag = false;
+    uint16_t i = 0 ;
+
+    char tmp1[2] = { 0 };
+    char tmp2[MAX_JSON_VALUE] = { 0 };
+
+    for ( i=0; i<strlen(in_str); i++)
+        {
+
+            if ( flag == 1 && in_str[i] == '\"' )
+                {
+                    flag = false;
+                }
+
+            if ( flag == true )
+                {
+                    snprintf(tmp1, sizeof(tmp1), "%c", in_str[i]);
+                    strlcat(tmp2, tmp1, sizeof(tmp2));
+                }
+
+            if ( in_str[i] == '\"' ) flag = true;
+
+        }
+
+    snprintf(str, size, "%s", tmp2);
+}
+
+/****************************************************************************
+ * Validate_HEX - Makes sure a string is valid hex.
+ ****************************************************************************/
+
+bool Validate_HEX (const char *string)
+{
+
+    const char *curr = string;
+
+    while (*curr != 0)
+        {
+            if (('A' <= *curr && *curr <= 'F') || ('a' <= *curr && *curr <= 'f') || ('0' <= *curr && *curr <= '9'))
+                {
+                    ++curr;
+                }
+            else
+                {
+                    return(false);
+                }
+        }
+    return(true);
+}
+
+
+bool Pipe_To_Value(const char *in_str, char *str, size_t size )
+{
+
+
+#define ALL_GOOD    0
+#define BAD_VALUE   1
+#define BAD_HEX	2
+
+    bool pipe_flag = false;
+
+    /* Set to RULEBUF.  Some meta_content strings can be rather large! */
+
+    char final_content[1024] = { 0 };
+    char final_content_tmp[3] = { 0 };
+    char tmp[2] = { 0 };
+
+    uint16_t i = 0;
+    int8_t x = 0;
+
+    pipe_flag = false;
+
+    for ( i=0; i<strlen(in_str); i++)
+        {
+
+            if ( in_str[i] == '|' && pipe_flag == 0 )
+                {
+                    pipe_flag = true;              /* First | has been found */
+                }
+
+            /* If we haven't found any |'s,  just copy the content verbatium */
+
+            if ( pipe_flag == false )
+                {
+                    snprintf(final_content_tmp, sizeof(final_content_tmp), "%c", in_str[i]);
+                    strncat(final_content, final_content_tmp, 1);
+                }
+
+            /* If | has been found,  start the conversion */
+
+            if ( pipe_flag == true )
+                {
+
+                    if ( in_str[i+1] == ' ' || in_str[i+2] == ' ' )
+                        {
+                            return(BAD_VALUE);
+                        }
+
+                    snprintf(final_content_tmp, sizeof(final_content_tmp), "%c%c", in_str[i+1], in_str[i+2]);       /* Copy the hex value - ie 3a, 1B, etc */
+
+                    if (!Validate_HEX(final_content_tmp))
+                        {
+                            return(BAD_HEX);
+                        }
+
+                    sscanf(final_content_tmp, "%x", &x);        /* Convert hex to dec */
+                    snprintf(tmp, sizeof(tmp), "%c", x);        /* Convert dec to ASCII */
+                    strncat(final_content, tmp, 1);             /* Append value */
+
+                    /* Last | found,  but continue processing rest of content as normal */
+
+                    if ( in_str[i+3] == '|' )
+                        {
+                            pipe_flag = false;
+                            i=i+3;
+                        }
+                    else
+                        {
+                            i = i+2;
+                        }
+                }
+
+        }
+
+    snprintf(str, size, "%s", final_content);
+    return(ALL_GOOD);
+
+}
 

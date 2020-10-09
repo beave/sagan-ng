@@ -30,7 +30,11 @@ struct _Rules
     char normalize[MAX_JSON_KEY];
     char reference[MAX_RULE_REFERENCE];
 
-    char search_string[MAX_RULE_SEARCH][SEARCH_STRING];
+    //char search_string[MAX_RULE_SEARCH][SEARCH_STRING];
+
+    char search_string[10][10][256];
+    uint8_t search_count;
+
     char search_key[MAX_RULE_SEARCH][MAX_JSON_KEY];
     bool search_type[MAX_RULE_SEARCH];
     bool search_case[MAX_RULE_SEARCH];
