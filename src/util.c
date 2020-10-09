@@ -163,6 +163,8 @@ void Var_To_Value(char *in_str, char *str, size_t size)
     char tmp3[MAX_VAR_VALUE_SIZE] = { 0 };
     char tmp_result[MAX_VAR_VALUE_SIZE] = { 0 };
     char tmp[MAX_VAR_VALUE_SIZE] = { 0 };
+    char tmp_quote[MAX_VAR_VALUE_SIZE] = { 0 };
+
     int i=0;
 
     snprintf(tmp, sizeof(tmp), "%s", in_str);           /* Segfault with strlcpy */
@@ -174,7 +176,6 @@ void Var_To_Value(char *in_str, char *str, size_t size)
 
             while (ptmp != NULL )
                 {
-
                     Replace_String(ptmp, Var[i].key, Var[i].value, tmp2, sizeof(tmp2));
                     snprintf(tmp3, sizeof(tmp3), "%s ", tmp2);
                     strlcat(tmp_result, tmp3, sizeof(tmp_result));
@@ -184,7 +185,6 @@ void Var_To_Value(char *in_str, char *str, size_t size)
             strlcpy(tmp, tmp_result, sizeof(tmp));
             memset(tmp_result, 0, sizeof(tmp_result));
         }
-
 
     tmp[strlen(tmp)-1] = 0;             /* Remove trailing space */
 

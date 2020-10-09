@@ -33,6 +33,7 @@
 #include "util.h"
 #include "rules.h"
 #include "counters.h"
+#include "var.h"
 
 #include "parsers/json.h"
 
@@ -59,6 +60,8 @@ void Load_Ruleset( const char *ruleset )
     uint16_t line_count = 0;
 
     char rulebuf[MAX_RULE_SIZE] = { 0 };
+    char var_to_value[MAX_VAR_VALUE_SIZE] = { 0 };
+
 
     FILE *rulesfile;
 
@@ -219,17 +222,23 @@ void Load_Ruleset( const char *ruleset )
                             for ( a = 0; a < MAX_RULE_SEARCH; a++ )
                                 {
 
+
+                                    // DO "MASK" - "mask": "This is a %SAGAN%",
+
                                     snprintf(tmpkey, MAX_JSON_KEY, ".%s.%d.string", s_e, a);
                                     tmpkey[ sizeof(tmpkey) - 1] = '\0';
 
                                     if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
                                         {
 
+
+                                            Var_To_Value( JSON_Key_String[i].json, var_to_value, sizeof(var_to_value));
+
                                             /* Not a list */
 
-                                            if ( JSON_Key_String[i].json[0] != '[' )
+                                            if ( var_to_value[0] != '[' )
                                                 {
-                                                    strlcpy(Rules[Counters->rules].search_string[search_string_count][0], JSON_Key_String[i].json, SEARCH_STRING);
+                                                    strlcpy(Rules[Counters->rules].search_string[search_string_count][0], var_to_value, MAX_SEARCH_STRING_SIZE);
                                                     Rules[Counters->rules].search_count = 1;
 
                                                 }
@@ -243,22 +252,20 @@ void Load_Ruleset( const char *ruleset )
 
                                                     char tmp[1024];
 
-                                                    JSON_Key_String[i].json[0] = ' ';
-                                                    JSON_Key_String[i].json[ strlen(JSON_Key_String[i].json) - 2 ] = '\0';
+                                                    var_to_value[0] = ' ';
+                                                    var_to_value[ strlen(var_to_value) - 2 ] = '\0';
 
-                                                    ptr1 = strtok_r(JSON_Key_String[i].json, ",", &tok1);
+                                                    ptr1 = strtok_r(var_to_value, ",", &tok1);
 
                                                     while ( ptr1 != NULL )
                                                         {
 
-                                                            Between_Quotes( ptr1, Rules[Counters->rules].search_string[search_string_count][search_count],SEARCH_STRING );
-
-                                                            // VAR TO VALUE HERE ??
+                                                            Between_Quotes( ptr1, Rules[Counters->rules].search_string[search_string_count][search_count],MAX_SEARCH_STRING_SIZE );
 
                                                             uint8_t ret = Pipe_To_Value( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, sizeof(tmp));
 
-                                                            printf("|%s|\n", tmp);
 
+                                                            printf("Store %d: |%s|\n", search_count, Rules[Counters->rules].search_string[search_string_count][search_count]);
 
                                                             if ( ret > 0 )
                                                                 {
@@ -356,16 +363,23 @@ void Load_Ruleset( const char *ruleset )
 
             search_string_count = 0;	/* Reset for next pass */
 
+            printf("%d\n", Rules[Counters->rules].search_string_count);
+
             for ( a = 0; a < Rules[Counters->rules].search_string_count; a++ )
                 {
 
-                    printf("KeyME: |%d|%s|\n", a, Rules[Counters->rules].search_key[a]);
-                    /*
-                                        if ( Rules[Counters->rules].search_key[a][0] == '\0' )
-                                            {
-                                                Sagan_Log(ERROR, "[%s, line %d] Error: `search` option lacks a 'key' option in %s at line %d. Abort.", __FILE__, __LINE__, ruleset, line_count);
-                                            }
-                    			*/
+                    for ( k = 0; k < Rules[Counters->rules].search_count; k++ )
+                        {
+
+                            printf("KeyME: |%d.%d|%s|%s\n", a, k, Rules[Counters->rules].search_key[a], Rules[Counters->rules].search_string[a][k]);
+
+                        }
+
+                    if ( Rules[Counters->rules].search_key[a][0] == '\0' )
+                        {
+                            Sagan_Log(ERROR, "[%s, line %d] Error: `search` option lacks a 'key' option in %s at line %d. Abort.", __FILE__, __LINE__, ruleset, line_count);
+                        }
+
 
                 }
 
