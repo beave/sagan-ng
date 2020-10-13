@@ -61,99 +61,140 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
 
 //            if ( Rules[rule_position].search_not[i] == false )
 //                {
-                    /* Go through JSON */
+            /* Go through JSON */
 
-                    for ( a = 0; a < json_count; a++ )
+            for ( a = 0; a < json_count; a++ )
+                {
+                    /* Look for target key */
+
+                    if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].search_key[i]) )
                         {
-                            /* Look for target key */
+                            /* Is search "contacts" or "exact" ? */
 
-                            if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].search_key[i]) )
+                            if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
                                 {
-                                    /* Is search "contacts" or "exact" ? */
+                                    /* Cycle through the # of searches (could be a list) */
 
-                                    if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
+                                    for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
                                         {
-                                            /* Cycle through the # of searches (could be a list) */
 
-                                            for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
+                                            if ( Rules[rule_position].search_case[i] == false )
                                                 {
+                                                    /* Case insensitive */
 
-                                                    if ( Rules[rule_position].search_case[i] == false )
+                                                    if ( Sagan_stristr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
                                                         {
-                                                            /* Case insensitive */
 
-                                                            if ( Sagan_stristr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
+                                                            if ( Rules[rule_position].search_not[i] == false )
                                                                 {
                                                                     total_hits++;
                                                                     break;
                                                                 }
-                                                        }
-                                                    else
-                                                        {
-                                                            /* Case sensitive */
+                                                            else
+                                                                {
+                                                                    return(false);
+                                                                }
 
-                                                            if ( Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
+                                                        }
+
+                                                }
+                                            else
+                                                {
+                                                    /* Case sensitive */
+
+                                                    if ( Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
+                                                        {
+                                                            if ( Rules[rule_position].search_not[i] == false )
                                                                 {
                                                                     total_hits++;
                                                                     break;
+                                                                }
+                                                            else
+                                                                {
+                                                                    return(false);
                                                                 }
                                                         }
                                                 }
 
+                                        } /* for ( k = 0; k < Rules[rule_position].search_count[i] */
+
+                                    /* If exclude and not found, its a "hit" */
+
+                                    if ( Rules[rule_position].search_not[i] == true )
+                                        {
+                                            total_hits++;
                                         }
-                                    else
+
+                                }
+                            else
+                                {
+
+                                    /* Exact match */
+
+                                    for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
                                         {
 
-                                            /* Exact match */
-
-
-                                            for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
+                                            if ( Rules[rule_position].search_case[i] == false )
                                                 {
+                                                    /* Case insensitive */
 
-                                                    if ( Rules[rule_position].search_case[i] == false )
+                                                    if ( !strcasecmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k]) )
                                                         {
-                                                            /* Case insensitive */
 
-                                                            if ( !strcasecmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k]) )
+                                                            if ( Rules[rule_position].search_not[i] == false )
                                                                 {
                                                                     total_hits++;
                                                                     break;
                                                                 }
+                                                            else
+                                                                {
+                                                                    return(false);
+                                                                }
                                                         }
-                                                    else
-                                                        {
-                                                            /* Case sensitive */
+                                                }
+                                            else
+                                                {
+                                                    /* Case sensitive */
 
-                                                            if ( !strcmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k] ) )
+                                                    if ( !strcmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k] ) )
+                                                        {
+
+                                                            if ( Rules[rule_position].search_not[i] == false )
                                                                 {
                                                                     total_hits++;
                                                                     break;
                                                                 }
+                                                            else
+                                                                {
+                                                                    return(false);
+                                                                }
                                                         }
+                                                }
 
-                                                } /* for ( k = 0; k < Rules[rule_position] */
+                                        } /* for ( k = 0; k < Rules[rule_position] */
 
+                                    /* If exclude and not found, its a "hit" */
+
+                                    if ( Rules[rule_position].search_not[i] == true )
+                                        {
+                                            total_hits++;
                                         }
                                 }
+                        }
 
-                        } /* for ( a = 0; a < json_count */
-
-                //} /* if ( Rules[rule_position].search_not[i] */
-/*
-            else
-
-                {
-
-                    printf("Do not\n");
-
-                }
-		*/
+                } /* for ( a = 0; a < json_count */
 
         }
 
+//    printf("Total hits: %d of %d\n", total_hits, Rules[rule_position].search_string_count);
 
-    printf("Total hits: %d\n", total_hits);
+    if ( total_hits == Rules[rule_position].search_string_count )
+        {
+//	    printf("RETURN TRUE\n");
+            return(true);
+        }
 
+    return(false);
 }
 
 

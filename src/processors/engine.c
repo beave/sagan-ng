@@ -59,15 +59,16 @@ bool results = false;
 			results = Search ( rule_position, json_count, JSON_Key_String); 
 			}
 
-/*	
+
 	if ( results == true ) 
 		{
-		printf("Fire event!\n");
-		Output( JSON_Key_String, json_count, rule_position );
+		printf("%d ***** Fire event! ******\n", results);
+		} else { 
+		printf("- MISS -\n");
 		}
 
-	printf("Results: %d\n", results);
-	*/
+//	printf("Results: %d\n", results);
+
 	}
 
 
