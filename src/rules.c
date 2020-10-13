@@ -238,8 +238,14 @@ void Load_Ruleset( const char *ruleset )
 
                                             if ( var_to_value[0] != '[' )
                                                 {
+
+                                                    printf("Rules[Counters->rules].search_string[%d][0] == %s\n", search_string_count, var_to_value);
+                                                    Rules[Counters->rules].search_not[search_string_count] = not;
+                                                    printf("not: %d\n", not);
+
                                                     strlcpy(Rules[Counters->rules].search_string[search_string_count][0], var_to_value, MAX_SEARCH_STRING_SIZE);
-                                                    Rules[Counters->rules].search_count = 1;
+                                                    Rules[Counters->rules].search_count[search_string_count] = 1;
+                                                    search_count=1;
 
                                                 }
                                             else
@@ -249,11 +255,15 @@ void Load_Ruleset( const char *ruleset )
 
                                                     char *ptr1 = NULL;
                                                     char *tok1 = NULL;
+                                                    search_count = 0;
 
                                                     char tmp[1024];
 
                                                     var_to_value[0] = ' ';
                                                     var_to_value[ strlen(var_to_value) - 2 ] = '\0';
+
+                                                    Rules[Counters->rules].search_not[search_string_count] = not;
+
 
                                                     ptr1 = strtok_r(var_to_value, ",", &tok1);
 
@@ -265,7 +275,9 @@ void Load_Ruleset( const char *ruleset )
                                                             uint8_t ret = Pipe_To_Value( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, sizeof(tmp));
 
 
-                                                            printf("Store %d: |%s|\n", search_count, Rules[Counters->rules].search_string[search_string_count][search_count]);
+                                                            printf("DEBUG: Rules[%d].search_string[%d][%d] == %s\n", Counters->rules, search_string_count, search_count, tmp);
+                                                            strlcpy( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, MAX_SEARCH_STRING_SIZE);
+
 
                                                             if ( ret > 0 )
                                                                 {
@@ -273,7 +285,7 @@ void Load_Ruleset( const char *ruleset )
                                                                 }
 
                                                             search_count++;
-                                                            Rules[Counters->rules].search_count = search_count;
+                                                            Rules[Counters->rules].search_count[search_string_count] = search_count;
 
                                                             ptr1 = strtok_r(NULL, ",", &tok1);
                                                         }
@@ -290,7 +302,7 @@ void Load_Ruleset( const char *ruleset )
 
                                                     /* Is this is 'search' or 'exclude' rule */
 
-                                                    Rules[Counters->rules].search_not[search_string_count] = not;
+//                                                    Rules[Counters->rules].search_not[search_string_count] = not;
 
                                                     /* Search for key */
 
@@ -307,42 +319,42 @@ void Load_Ruleset( const char *ruleset )
                                                     snprintf(tmpkey, MAX_JSON_KEY, ".%s.%d.case", s_e, a);
                                                     tmpkey[ sizeof(tmpkey) - 1] = '\0';
 
-                                                    if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
+                                                    if ( !strcmp( JSON_Key_String[k].key, tmpkey ) )
                                                         {
 
-                                                            if ( !strcmp( JSON_Key_String[i].json, "true" ) )
+                                                            if ( !strcmp( JSON_Key_String[k].json, "true" ) )
                                                                 {
                                                                     Rules[Counters->rules].search_case[search_string_count] = true;
                                                                 }
 
-                                                            if ( strcmp( JSON_Key_String[i].json, "true" ) && strcmp( JSON_Key_String[i].json, "false" ) )
+                                                            if ( strcmp( JSON_Key_String[k].json, "true" ) && strcmp( JSON_Key_String[k].json, "false" ) )
                                                                 {
                                                                     Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'case' of 'true' or 'false'  but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[i].json, ruleset, line_count);
                                                                 }
 
                                                         }
 
-                                                    /* Search 'type' ( 'search' or 'exclude' ) */
+                                                    /* Search 'type' ( 'contains' or 'exact' ) */
 
                                                     snprintf(tmpkey, MAX_JSON_KEY, ".%s.%d.type", s_e, a);
                                                     tmpkey[ sizeof(tmpkey) - 1] = '\0';
 
-                                                    if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
+                                                    if ( !strcmp( JSON_Key_String[k].key, tmpkey ) )
                                                         {
 
-                                                            if ( !strcmp( JSON_Key_String[i].json, "exact" ) )
+                                                            if ( !strcmp( JSON_Key_String[k].json, "exact" ) )
                                                                 {
                                                                     Rules[Counters->rules].search_type[search_string_count] = SEARCH_TYPE_EXACT;
                                                                 }
 
-                                                            if ( !strcmp( JSON_Key_String[i].json, "contains" ) )
+                                                            if ( !strcmp( JSON_Key_String[k].json, "contains" ) )
                                                                 {
                                                                     Rules[Counters->rules].search_type[search_string_count] = SEARCH_TYPE_CONTAINS;
                                                                 }
 
-                                                            if ( strcmp( JSON_Key_String[i].json, "exact" ) && strcmp( JSON_Key_String[i].json, "contains" ) )
+                                                            if ( strcmp( JSON_Key_String[k].json, "exact" ) && strcmp( JSON_Key_String[k].json, "contains" ) )
                                                                 {
-                                                                    Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'type' of 'exact' or 'contains' but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[i].json, ruleset, line_count);
+                                                                    Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'type' of 'exact' or 'contains' but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[k].json, ruleset, line_count);
                                                                 }
 
                                                         }
@@ -363,15 +375,20 @@ void Load_Ruleset( const char *ruleset )
 
             search_string_count = 0;	/* Reset for next pass */
 
-            printf("%d\n", Rules[Counters->rules].search_string_count);
+            Rules[Counters->rules].search_count;
+
+            printf("DEBUG: Total search items in this rule: %d\n", Rules[Counters->rules].search_string_count);
+
 
             for ( a = 0; a < Rules[Counters->rules].search_string_count; a++ )
                 {
 
-                    for ( k = 0; k < Rules[Counters->rules].search_count; k++ )
+                    printf("DEBUG: Count of nest search: Rules[%d].search_count[%d] == %d\n", Counters->rules, a, Rules[Counters->rules].search_count[a]);
+
+                    for ( k = 0; k < Rules[Counters->rules].search_count[a]; k++ )
                         {
 
-                            printf("KeyME: |%d.%d|%s|%s\n", a, k, Rules[Counters->rules].search_key[a], Rules[Counters->rules].search_string[a][k]);
+                            printf("DEBUG: Array Contents: KeyME: |%d %d.%d|%s|%s\n", Counters->rules, a, k, Rules[Counters->rules].search_key[a], Rules[Counters->rules].search_string[a][k]);
 
                         }
 
@@ -380,9 +397,7 @@ void Load_Ruleset( const char *ruleset )
                             Sagan_Log(ERROR, "[%s, line %d] Error: `search` option lacks a 'key' option in %s at line %d. Abort.", __FILE__, __LINE__, ruleset, line_count);
                         }
 
-
                 }
-
 
             __atomic_add_fetch(&Counters->rules, 1, __ATOMIC_SEQ_CST);
 

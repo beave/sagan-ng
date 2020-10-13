@@ -32,17 +32,21 @@ struct _Rules
     char normalize[MAX_JSON_KEY];
     char reference[MAX_RULE_REFERENCE];
 
-    //char search_string[MAX_RULE_SEARCH][SEARCH_STRING];
-
     char search_string[MAX_RULE_SEARCH][MAX_SEARCH_STRING][MAX_SEARCH_STRING_SIZE];
-    uint8_t search_count;
+
+    uint8_t search_count[MAX_RULE_SEARCH];		/* Number of individual items to
+    							   search.  It can be a list ["this",
+							   "is","a","search"] or single item. */
+
 
     char search_key[MAX_RULE_SEARCH][MAX_JSON_KEY];
     bool search_type[MAX_RULE_SEARCH];
     bool search_case[MAX_RULE_SEARCH];
     bool search_not[MAX_RULE_SEARCH];
     char search_mask[MAX_RULE_SEARCH_MASK];
-    uint8_t search_string_count;
+
+    uint8_t search_string_count;			/* Number of "search" requests. "search":
+    							   { "0": { ... }, "1": { ... }} would be 2. */
 
 
 };

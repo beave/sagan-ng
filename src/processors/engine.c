@@ -50,7 +50,7 @@ bool results = false;
 	for ( rule_position = 0; rule_position < Counters->rules; rule_position++ ) 
 	{
 
-		results = true; 
+		results = false; 
 
 		/* Do we need to do a "search" */
 
@@ -59,7 +59,7 @@ bool results = false;
 			results = Search ( rule_position, json_count, JSON_Key_String); 
 			}
 
-	
+/*	
 	if ( results == true ) 
 		{
 		printf("Fire event!\n");
@@ -67,6 +67,7 @@ bool results = false;
 		}
 
 	printf("Results: %d\n", results);
+	*/
 	}
 
 

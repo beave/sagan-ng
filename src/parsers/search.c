@@ -5,7 +5,11 @@
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License Version 2 as
-** published by the Free Software Foundation.  You may not use, modify or                                    ** distribute this program under any other version of the GNU General                                        ** Public License.                                                                                           **                                                                                                           ** This program is distributed in the hope that it will be useful,
+** published by the Free Software Foundation.  You may not use, modify or
+** distribute this program under any other version of the GNU General
+** Public License.
+**
+** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
@@ -44,96 +48,111 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
 {
 
     uint8_t i = 0;
+    uint8_t k = 0;
     uint16_t a = 0;
+    uint8_t total_hits = 0;
+
+    bool flag = false;
+
+    /* Total "search" items rules */
 
     for ( i = 0; i < Rules[rule_position].search_string_count; i++ )
         {
 
-            for ( a = 0; a < json_count; a++ )
-                {
+//            if ( Rules[rule_position].search_not[i] == false )
+//                {
+                    /* Go through JSON */
 
-                    if ( Rules[rule_position].search_not[i] == false )
+                    for ( a = 0; a < json_count; a++ )
                         {
+                            /* Look for target key */
 
                             if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].search_key[i]) )
                                 {
+                                    /* Is search "contacts" or "exact" ? */
 
-                                    if ( Rules[rule_position].search_case[i] == false )
+                                    if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
                                         {
+                                            /* Cycle through the # of searches (could be a list) */
 
-                                            /* Case _insensitive_ search */
-
-                                            if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
+                                            for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
                                                 {
 
-                                                    /* Search type is "contains" */
-
-                                                    if ( !Sagan_stristr( JSON_Key_String[a].json, Rules[rule_position].search_string[i], true ) )
+                                                    if ( Rules[rule_position].search_case[i] == false )
                                                         {
-                                                            return(false);
+                                                            /* Case insensitive */
+
+                                                            if ( Sagan_stristr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
+                                                                {
+                                                                    total_hits++;
+                                                                    break;
+                                                                }
                                                         }
-
-                                                }
-                                            else
-                                                {
-
-                                                    /* Search type is "exact" */
-
-                                                    if ( strcasecmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i] ) )
+                                                    else
                                                         {
-                                                            return(false);
-                                                        }
+                                                            /* Case sensitive */
 
+                                                            if ( Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
+                                                                {
+                                                                    total_hits++;
+                                                                    break;
+                                                                }
+                                                        }
                                                 }
 
                                         }
                                     else
                                         {
 
-                                            /* Case sensitive */
+                                            /* Exact match */
 
-                                            if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
+
+                                            for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
                                                 {
 
-                                                    /* Rule type is "contains" */
-
-                                                    if ( !Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i] ) )
+                                                    if ( Rules[rule_position].search_case[i] == false )
                                                         {
-                                                            return(false);
+                                                            /* Case insensitive */
+
+                                                            if ( !strcasecmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k]) )
+                                                                {
+                                                                    total_hits++;
+                                                                    break;
+                                                                }
+                                                        }
+                                                    else
+                                                        {
+                                                            /* Case sensitive */
+
+                                                            if ( !strcmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k] ) )
+                                                                {
+                                                                    total_hits++;
+                                                                    break;
+                                                                }
                                                         }
 
-                                                }
-                                            else
-                                                {
+                                                } /* for ( k = 0; k < Rules[rule_position] */
 
-                                                    /* Rule type is "exact */
-
-                                                    if ( strcmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i] ) )
-                                                        {
-                                                            return(false);
-                                                        }
-
-                                                }
                                         }
+                                }
 
-                                } /* strcmp(JSON_Key_String[a].key ... */
+                        } /* for ( a = 0; a < json_count */
 
-                        } else {  /* Rules[rule_position].search_not[i] == false */
+                //} /* if ( Rules[rule_position].search_not[i] */
+/*
+            else
 
-				printf("GOT NOT RULE\n");
+                {
+
+                    printf("Do not\n");
+
+                }
+		*/
+
+        }
 
 
-				}
-			
-
-                } /* for ( a = 0; a < json_count; a++ ) */
-
-        } /* for ( i = 0; i < Rules[rule_position].search_string_count */
-
-
-    /* If everything lines up,  we have a full json_content match */
-
-    return(true);
+    printf("Total hits: %d\n", total_hits);
 
 }
 
