@@ -44,32 +44,34 @@ struct _Counters *Counters;
 void Engine( struct _JSON_Key_String *JSON_Key_String, uint16_t json_count )
 {
 
-uint32_t rule_position = 0;
-bool results = false;
+    uint32_t rule_position = 0;
+    bool results = false;
 
-	for ( rule_position = 0; rule_position < Counters->rules; rule_position++ ) 
-	{
+    for ( rule_position = 0; rule_position < Counters->rules; rule_position++ )
+        {
 
-		results = false; 
+            results = false;
 
-		/* Do we need to do a "search" */
+            /* Do we need to do a "search" */
 
-		if ( Rules[rule_position].search_string_count != 0 ) 
-			{
-			results = Search ( rule_position, json_count, JSON_Key_String); 
-			}
+            if ( Rules[rule_position].search_string_count != 0 )
+                {
+                    results = Search ( rule_position, json_count, JSON_Key_String);
+                }
 
 
-	if ( results == true ) 
-		{
-		printf("%d ***** Fire event! ******\n", results);
-		} else { 
-		printf("- MISS -\n");
-		}
+            if ( results == true )
+                {
+                    printf("%d ***** Fire event! ******\n", results);
+                }
+            else
+                {
+                    printf("- MISS -\n");
+                }
 
 //	printf("Results: %d\n", results);
 
-	}
+        }
 
 
 }

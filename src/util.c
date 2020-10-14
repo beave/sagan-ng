@@ -440,23 +440,19 @@ bool Pipe_To_Value(const char *in_str, char *str, size_t size )
 void Replace_Sagan( const char *in_str, char *replace, char *str, size_t size )
 {
 
-    char string[1024] = { 0 };
     char tmp[2] = { 0 };
-
     char new_string[MAX_JSON_VALUE] = { 0 };
 
     uint16_t i = 0;
 
-    strlcpy(string, in_str, sizeof(string));
-
-    for (i = 0; i < strlen(string); i++)
+    for (i = 0; i < strlen(in_str); i++)
         {
 
-            if ( string[i] == '%' )
+            if ( in_str[i] == '%' )
                 {
 
-                    if ( string[i+1] == 'S' && string[i+2] == 'A' && string[i+3] == 'G' &&
-                            string[i+4] == 'A' && string[i+5] == 'N' && string[i+6] == '%' )
+                    if ( in_str[i+1] == 'S' && in_str[i+2] == 'A' && in_str[i+3] == 'G' &&
+                            in_str[i+4] == 'A' && in_str[i+5] == 'N' && in_str[i+6] == '%' )
                         {
 
                             strlcat(new_string, replace, sizeof(new_string));
@@ -473,7 +469,7 @@ void Replace_Sagan( const char *in_str, char *replace, char *str, size_t size )
             else
                 {
 
-                    snprintf(tmp, sizeof(tmp), "%c", string[i]);
+                    snprintf(tmp, sizeof(tmp), "%c", in_str[i]);
                     strlcat(new_string, tmp, sizeof(new_string));
 
                 }

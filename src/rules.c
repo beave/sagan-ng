@@ -19,12 +19,16 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+/* TODO:  var_to_value for things like "description", etc! */
+
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"             /* From autoconf */
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "sagan-ng-defs.h"
 #include "sagan-ng.h"
@@ -51,11 +55,13 @@ void Load_Ruleset( const char *ruleset )
     uint16_t i = 0;
     uint16_t a = 0;
     uint16_t k = 0;
-//    uint8_t  b = 0;
     uint8_t  z = 0;
+
+    uint64_t check = 0;
 
     uint16_t search_string_count = 0;
     uint8_t  serach_count = 0;
+    uint8_t ret = 0;
 
     char tmpkey[MAX_JSON_KEY] = { 0 };
     uint16_t search_count = 0;
@@ -65,7 +71,7 @@ void Load_Ruleset( const char *ruleset )
 
     char rulebuf[MAX_RULE_SIZE] = { 0 };
     char var_to_value[MAX_VAR_VALUE_SIZE] = { 0 };
-    char tmp[1024] = { 0 };
+    char tmp[MAX_SEARCH_STRING_SIZE] = { 0 };
 
 
     FILE *rulesfile;
@@ -109,6 +115,7 @@ void Load_Ruleset( const char *ruleset )
 
                     if ( Rules == NULL )
                         {
+                            fclose(rulesfile);
                             Sagan_Log(ERROR, "[%s, line %d] Failed to reallocate memory for _Rules. Abort!", __FILE__, __LINE__);
                         }
 
@@ -116,13 +123,20 @@ void Load_Ruleset( const char *ruleset )
 
                 }
 
-            Remove_Return(rulebuf);
+            if ( Debug->rules )
+                {
+                    Sagan_Log(DEBUG, "[%s, line %d] RULES: ---------=[ Line: %d, Rule: %d ]=-----------------------------------------", __FILE__, __LINE__, line_count, Counters->rules);
+                }
 
+
+            Remove_Return(rulebuf);
 
             json_count = Parse_JSON( rulebuf, JSON_Key_String);
 
             if ( json_count == 1 )
                 {
+                    free(JSON_Key_String);
+                    fclose(rulesfile);
                     Sagan_Log(ERROR, "[%s, line %d] Failed to parse rule in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
                 }
 
@@ -135,7 +149,7 @@ void Load_Ruleset( const char *ruleset )
 
                     if ( Debug->rules )
                         {
-                            Sagan_Log(DEBUG, "RULES: %d Key: %s, Value: %s", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
+                            Sagan_Log(DEBUG, "[%s, line %d] RULES: %d Key: %s, Value: %s", __FILE__, __LINE__, i, JSON_Key_String[i].key, JSON_Key_String[i].json);
                         }
 
                     if ( !strcmp( JSON_Key_String[i].key, ".signature_id" ) )
@@ -145,6 +159,8 @@ void Load_Ruleset( const char *ruleset )
 
                             if ( Rules[Counters->rules].signature_id == 0 )
                                 {
+                                    free(JSON_Key_String);
+                                    fclose(rulesfile);
                                     Sagan_Log(ERROR, "[%s, line %d] Invalid 'signature_id' in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
                                 }
 
@@ -157,6 +173,8 @@ void Load_Ruleset( const char *ruleset )
 
                             if ( Rules[Counters->rules].revision == 0 )
                                 {
+                                    free(JSON_Key_String);
+                                    fclose(rulesfile);
                                     Sagan_Log(ERROR, "[%s, line %d] Invalid 'revision' in %s at line %d", __FILE__, __LINE__, ruleset, line_count);
                                 }
 
@@ -174,6 +192,8 @@ void Load_Ruleset( const char *ruleset )
 
                             if ( Classtype_Lookup( Rules[Counters->rules].classification, Rules[Counters->rules].classification_desc, MAX_RULE_CLASSIFICATION_DESC ) == -1 )
                                 {
+                                    free(JSON_Key_String);
+                                    fclose(rulesfile);
                                     Sagan_Log(ERROR, "[%s, line %d] Error: Could find classification of '%s' in %s at line %d. Abort.", __FILE__, __LINE__, Rules[Counters->rules].classification, ruleset, line_count);
                                 }
 
@@ -196,11 +216,15 @@ void Load_Ruleset( const char *ruleset )
 
             if ( Rules[Counters->rules].classification[0] == '\0' )
                 {
+                    free(JSON_Key_String);
+                    fclose(rulesfile);
                     Sagan_Log(ERROR, "[%s, line %d] Error: No 'classification' specified in %s at line %d is invalid.  Abort.", __FILE__, __LINE__, ruleset, line_count);
                 }
 
             if ( Rules[Counters->rules].description[0] == '\0' )
                 {
+                    free(JSON_Key_String);
+                    fclose(rulesfile);
                     Sagan_Log(ERROR, "[%s, line %d] Error: No 'description' specified in %s at line %d is invalid.  Abort.", __FILE__, __LINE__, ruleset, line_count);
                 }
 
@@ -229,14 +253,11 @@ void Load_Ruleset( const char *ruleset )
                             for ( a = 0; a < MAX_RULE_SEARCH; a++ )
                                 {
 
-                                    // DO "MASK" - "mask": "This is a %SAGAN%",
-
                                     snprintf(tmpkey, MAX_JSON_KEY, ".%s.%d.string", s_e, a);
                                     tmpkey[ sizeof(tmpkey) - 1] = '\0';
 
                                     if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
                                         {
-
 
                                             Var_To_Value( JSON_Key_String[i].json, var_to_value, sizeof(var_to_value));
 
@@ -245,11 +266,25 @@ void Load_Ruleset( const char *ruleset )
                                             if ( var_to_value[0] != '[' )
                                                 {
 
-                                                    printf("Rules[Counters->rules].search_string[%d][0] == %s\n", search_string_count, var_to_value);
                                                     Rules[Counters->rules].search_not[search_string_count] = not;
-                                                    printf("not: %d\n", not);
 
-                                                    strlcpy(Rules[Counters->rules].search_string[search_string_count][0], var_to_value, MAX_SEARCH_STRING_SIZE);
+                                                    strlcpy(tmp, var_to_value, MAX_SEARCH_STRING_SIZE);
+
+                                                    ret = Pipe_To_Value( tmp, Rules[Counters->rules].search_string[search_string_count][0], MAX_SEARCH_STRING_SIZE);
+
+                                                    if ( ret > 0 )
+                                                        {
+                                                            free(JSON_Key_String);
+                                                            fclose(rulesfile);
+                                                            Sagan_Log(ERROR, "[%s, line %d] Error: Got bad hex value in %s at line %d.  Abort.", __FILE__, __LINE__, ruleset, line_count, Rules[Counters->rules].search_string[search_string_count][0]);
+                                                        }
+
+
+                                                    if ( Debug->rules )
+                                                        {
+                                                            Sagan_Log(DEBUG, "[%s, line %d] RULES: [Single] Rules[%d].search_string[%d][0] == %s", __FILE__, __LINE__, Counters->rules, search_string_count );
+                                                        }
+
                                                     Rules[Counters->rules].search_count[search_string_count] = 1;
                                                     search_count=1;
 
@@ -263,13 +298,10 @@ void Load_Ruleset( const char *ruleset )
                                                     char *tok1 = NULL;
                                                     search_count = 0;
 
-                                                    //char tmp[1024];
-
                                                     var_to_value[0] = ' ';
                                                     var_to_value[ strlen(var_to_value) - 2 ] = '\0';
 
                                                     Rules[Counters->rules].search_not[search_string_count] = not;
-
 
                                                     ptr1 = strtok_r(var_to_value, ",", &tok1);
 
@@ -278,19 +310,21 @@ void Load_Ruleset( const char *ruleset )
 
                                                             Between_Quotes( ptr1, Rules[Counters->rules].search_string[search_string_count][search_count],MAX_SEARCH_STRING_SIZE );
 
-                                                            uint8_t ret = Pipe_To_Value( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, sizeof(tmp));
-
-                                                            if ( Debug->rules )
-                                                                {
-                                                                    Sagan_Log(DEBUG,"RULES: Rules[%d].search_string[%d][%d] == %s", Counters->rules, search_string_count, search_count, tmp);
-                                                                }
-
-                                                            strlcpy( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, MAX_SEARCH_STRING_SIZE);
+                                                            ret = Pipe_To_Value( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, MAX_SEARCH_STRING_SIZE);
 
                                                             if ( ret > 0 )
                                                                 {
+                                                                    free(JSON_Key_String);
+                                                                    fclose(rulesfile);
                                                                     Sagan_Log(ERROR, "[%s, line %d] Error: Got bad hex value in %s at line %d.  Abort.", __FILE__, __LINE__, ruleset, line_count);
                                                                 }
+
+                                                            if ( Debug->rules )
+                                                                {
+                                                                    Sagan_Log(DEBUG,"[%s, line %d] RULES: [List] Rules[%d].search_string[%d][%d] == %s", __FILE__, __LINE__, Counters->rules, search_string_count, search_count, tmp);
+                                                                }
+
+                                                            strlcpy( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, MAX_SEARCH_STRING_SIZE);
 
                                                             search_count++;
                                                             Rules[Counters->rules].search_count[search_string_count] = search_count;
@@ -307,10 +341,6 @@ void Load_Ruleset( const char *ruleset )
 
                                             for ( k = 0; k < json_count; k++ )
                                                 {
-
-                                                    /* Is this is 'search' or 'exclude' rule */
-
-//                                                    Rules[Counters->rules].search_not[search_string_count] = not;
 
                                                     /* Search for key */
 
@@ -347,6 +377,8 @@ void Load_Ruleset( const char *ruleset )
 
                                                             if ( strcmp( JSON_Key_String[k].json, "true" ) && strcmp( JSON_Key_String[k].json, "false" ) )
                                                                 {
+                                                                    free(JSON_Key_String);
+                                                                    fclose(rulesfile);
                                                                     Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'case' of 'true' or 'false'  but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[i].json, ruleset, line_count);
                                                                 }
 
@@ -372,6 +404,8 @@ void Load_Ruleset( const char *ruleset )
 
                                                             if ( strcmp( JSON_Key_String[k].json, "exact" ) && strcmp( JSON_Key_String[k].json, "contains" ) )
                                                                 {
+                                                                    free(JSON_Key_String);
+                                                                    fclose(rulesfile);
                                                                     Sagan_Log(ERROR, "[%s, line %d] Error: Expected a 'search' 'type' of 'exact' or 'contains' but got '%s' in %s at line %d.  Abort.", __FILE__, __LINE__, JSON_Key_String[k].json, ruleset, line_count);
                                                                 }
 
@@ -394,7 +428,7 @@ void Load_Ruleset( const char *ruleset )
 
             if ( Debug->rules )
                 {
-                    Sagan_Log(DEBUG, "RULES: Total search items in this rule: %d", Rules[Counters->rules].search_string_count);
+                    Sagan_Log(DEBUG, "[%s, line %d] RULES: Total search items in this rule: %d", __FILE__, __LINE__, Rules[Counters->rules].search_string_count);
                 }
 
 
@@ -404,24 +438,24 @@ void Load_Ruleset( const char *ruleset )
                     if ( Debug->rules)
                         {
 
-                            Sagan_Log(DEBUG, "RULES: Count of nest search: Rules[%d].search_count[%d] == %d", Counters->rules, a, Rules[Counters->rules].search_count[a]);
+                            Sagan_Log(DEBUG, "[%s, line %d] RULES: Count of nest search: Rules[%d].search_count[%d] == %d", __FILE__, __LINE__, Counters->rules, a, Rules[Counters->rules].search_count[a]);
 
                             for ( k = 0; k < Rules[Counters->rules].search_count[a]; k++ )
                                 {
-                                    Sagan_Log(DEBUG, "RULES: Array Contents: |%d %d.%d|%s|%s", Counters->rules, a, k, Rules[Counters->rules].search_key[a], Rules[Counters->rules].search_string[a][k]);
+                                    Sagan_Log(DEBUG, "[%s, line %d] RULES: Array Contents: |%d %d.%d|%s|%s", __FILE__, __LINE__, Counters->rules, a, k, Rules[Counters->rules].search_key[a], Rules[Counters->rules].search_string[a][k]);
 
                                 }
 
                         }
 
-		    /* If we have a mask (%SAGAN%),  then setup the new search strings */
+                    /* If we have a mask (%SAGAN%),  then setup the new search strings */
 
                     if ( Rules[Counters->rules].search_mask[a][0] != '\0' )
                         {
 
                             if ( Debug->rules )
                                 {
-                                    Sagan_Log(DEBUG, "RULES: Got mask \"%s\"", Rules[Counters->rules].search_mask[a]);
+                                    Sagan_Log(DEBUG, "[%s, line %d] RULES: Got mask \"%s\"", __FILE__, __LINE__, Rules[Counters->rules].search_mask[a]);
                                 }
 
                             for (k = 0; k < Rules[Counters->rules].search_string_count; k++ )
@@ -431,15 +465,17 @@ void Load_Ruleset( const char *ruleset )
 
                                     if ( Debug->rules )
                                         {
-                                            Sagan_Log(DEBUG, "RULES: New Rules[%d].search_string[%d][%d] wiht mask \"%s\"", Counters->rules, a, k, Rules[Counters->rules].search_string[a][k]);
+                                            Sagan_Log(DEBUG, "[%s, line %d] RULES: New Rules[%d].search_string[%d][%d] wiht mask \"%s\"", __FILE__, __LINE__, Counters->rules, a, k, Rules[Counters->rules].search_string[a][k]);
                                         }
                                 }
                         }
 
-		    /* Sanity check */
+                    /* Sanity check */
 
                     if ( Rules[Counters->rules].search_key[a][0] == '\0' )
                         {
+                            free(JSON_Key_String);
+                            fclose(rulesfile);
                             Sagan_Log(ERROR, "[%s, line %d] Error: `search` option lacks a 'key' option in %s at line %d. Abort.", __FILE__, __LINE__, ruleset, line_count);
                         }
 
@@ -447,12 +483,34 @@ void Load_Ruleset( const char *ruleset )
 
             __atomic_add_fetch(&Counters->rules, 1, __ATOMIC_SEQ_CST);
 
-
         } /* while ( fgets(rulebuf .... */
+
+    /* Verify we don't have duplicate signature id's! */
+
+    for (a = 0; a < Counters->rules; a++)
+        {
+
+            for ( check = a+1; check < Counters->rules; check++ )
+                {
+
+                    if ( Rules[check].signature_id  == Rules[a].signature_id  )
+                        {
+                            free(JSON_Key_String);
+                            fclose(rulesfile);
+
+                            Sagan_Log( ERROR, "[%s, line %d] Detected duplicate 'signature_id' number %" PRIu64 ".", __FILE__, __LINE__, Rules[check].signature_id );
+                        }
+                }
+        }
 
 
     free(JSON_Key_String);
     fclose(rulesfile);
+
+    if ( Debug->rules )
+        {
+            Sagan_Log(DEBUG, "[%s, line %d] RULES: -------=[ Rule load complete! Lines processed: %d, Rules Total: %d ]=-------", __FILE__, __LINE__, line_count, Counters->rules );
+        }
 
 }
 

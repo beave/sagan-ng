@@ -40,7 +40,6 @@ struct _Rules
     							   search.  It can be a list ["this",
 							   "is","a","search"] or single item. */
 
-
     char search_key[MAX_RULE_SEARCH][MAX_JSON_KEY];
     bool search_type[MAX_RULE_SEARCH];
     bool search_case[MAX_RULE_SEARCH];

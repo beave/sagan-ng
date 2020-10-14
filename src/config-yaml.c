@@ -114,7 +114,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                     if ( Debug->config )
                         {
-                            Sagan_Log(DEBUG, "[%s, line %d] YAML_DOCUMENT_START_EVENT", __FILE__, __LINE__);
+                            Sagan_Log(DEBUG, "[%s, line %d] CONFIG: YAML_DOCUMENT_START_EVENT", __FILE__, __LINE__);
                         }
 
                     yaml_version_directive_t *ver = event.data.document_start.version_directive;
@@ -143,7 +143,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                     if ( Debug->config )
                         {
-                            Sagan_Log(DEBUG, "[%s, line %d] YAML_STREAM_END_EVENT", __FILE__, __LINE__);
+                            Sagan_Log(DEBUG, "[%s, line %d] CONFIG: YAML_STREAM_END_EVENT", __FILE__, __LINE__);
                         }
                 }
 
@@ -154,7 +154,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                     if ( Debug->config )
                         {
-                            Sagan_Log(DEBUG, "[%s, line %d] YAML_MAPPING_START_EVENT", __FILE__, __LINE__);
+                            Sagan_Log(DEBUG, "[%s, line %d] CONFIG: YAML_MAPPING_START_EVENT", __FILE__, __LINE__);
                         }
                 }
 
@@ -166,7 +166,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                     if ( Debug->config )
                         {
-                            Sagan_Log(DEBUG, "[%s, line %d] YAML_MAPPING_END_EVENT", __FILE__, __LINE__);
+                            Sagan_Log(DEBUG, "[%s, line %d] CONFIG: YAML_MAPPING_END_EVENT", __FILE__, __LINE__);
                         }
                 }
 
@@ -181,7 +181,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                     if ( Debug->config )
                         {
-                            Sagan_Log(DEBUG, "[%s, line %d] YAML_SCALAR_EVENT - Value: \"%s\"", __FILE__, __LINE__, value);
+                            Sagan_Log(DEBUG, "[%s, line %d] CONFIG: YAML_SCALAR_EVENT - Value: \"%s\"", __FILE__, __LINE__, value);
                         }
 
                     /* Load variables! */
@@ -255,7 +255,7 @@ void Load_YAML_Config( const char *yaml_file )
                                                             if ( Debug->config )
                                                                 {
 
-                                                                    Sagan_Log(DEBUG, "[%s, line %d] Variable from file \"%s\" var \"%s\" loaded: \"%s\"", __FILE__, __LINE__, filename, Var[Counters->var].value, tmpbuf);
+                                                                    Sagan_Log(DEBUG, "[%s, line %d] CONFIG: Variable from file \"%s\" var \"%s\" loaded: \"%s\"", __FILE__, __LINE__, filename, Var[Counters->var].value, tmpbuf);
                                                                 }
 
                                                             if ( check == 0 )
@@ -283,7 +283,7 @@ void Load_YAML_Config( const char *yaml_file )
                                                     if ( Debug->config )
                                                         {
 
-                                                            Sagan_Log(DEBUG, "[%s, line %d] Final load from file for \"%s\" value \"%s\"", __FILE__, __LINE__, Var[Counters->var].key, Var[Counters->var].value);
+                                                            Sagan_Log(DEBUG, "[%s, line %d] CONFIG: Final load from file for \"%s\" value \"%s\"", __FILE__, __LINE__, Var[Counters->var].key, Var[Counters->var].value);
 
                                                         }
 
@@ -302,7 +302,7 @@ void Load_YAML_Config( const char *yaml_file )
                                                     if ( Debug->config )
                                                         {
 
-                                                            Sagan_Log(DEBUG, "[%s, line %d] Variable: \"%s == %s\"", __FILE__, __LINE__, Var[Counters->var].key, Var[Counters->var].value);
+                                                            Sagan_Log(DEBUG, "[%s, line %d] CONFIG: Variable: \"%s == %s\"", __FILE__, __LINE__, Var[Counters->var].key, Var[Counters->var].value);
                                                         }
 
                                                     __atomic_add_fetch(&Counters->var, 1, __ATOMIC_SEQ_CST);
@@ -610,7 +610,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                             if ( Debug->config )
                                 {
-                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found variables ****", __FILE__, __LINE__);
+                                    Sagan_Log(DEBUG, "[%s, line %d] CONFIG: **** Found variables ****", __FILE__, __LINE__);
                                 }
 
                             type = YAML_TYPE_VAR;
@@ -623,7 +623,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                             if ( Debug->config )
                                 {
-                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found \"configuration\" ****", __FILE__, __LINE__);
+                                    Sagan_Log(DEBUG, "[%s, line %d] CONFIG: **** Found \"configuration\" ****", __FILE__, __LINE__);
                                 }
 
                             type = YAML_TYPE_CORE;
@@ -636,7 +636,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                             if ( Debug->config )
                                 {
-                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found \"input\" ****", __FILE__, __LINE__);
+                                    Sagan_Log(DEBUG, "[%s, line %d] CONFIG: **** Found \"input\" ****", __FILE__, __LINE__);
                                 }
 
                             type = YAML_TYPE_INPUT;
@@ -649,7 +649,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                             if ( Debug->config )
                                 {
-                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found \"output\" ****", __FILE__, __LINE__);
+                                    Sagan_Log(DEBUG, "[%s, line %d] CONFIG: **** Found \"output\" ****", __FILE__, __LINE__);
                                 }
 
                             type = YAML_TYPE_OUTPUT;
@@ -662,7 +662,7 @@ void Load_YAML_Config( const char *yaml_file )
 
                             if ( Debug->config )
                                 {
-                                    Sagan_Log(DEBUG, "[%s, line %d] **** Found \"rule-files\" ****", __FILE__, __LINE__);
+                                    Sagan_Log(DEBUG, "[%s, line %d] CONFIG: **** Found \"rule-files\" ****", __FILE__, __LINE__);
                                 }
 
                             type = YAML_TYPE_RULES;
