@@ -432,3 +432,55 @@ bool Pipe_To_Value(const char *in_str, char *str, size_t size )
 
 }
 
+/****************************************************************************
+ * Replace_Sagan() - Take the %sagan% out of a string and replaces it
+ * with *replace
+ ****************************************************************************/
+
+void Replace_Sagan( const char *in_str, char *replace, char *str, size_t size )
+{
+
+    char string[1024] = { 0 };
+    char tmp[2] = { 0 };
+
+    char new_string[MAX_JSON_VALUE] = { 0 };
+
+    uint16_t i = 0;
+
+    strlcpy(string, in_str, sizeof(string));
+
+    for (i = 0; i < strlen(string); i++)
+        {
+
+            if ( string[i] == '%' )
+                {
+
+                    if ( string[i+1] == 'S' && string[i+2] == 'A' && string[i+3] == 'G' &&
+                            string[i+4] == 'A' && string[i+5] == 'N' && string[i+6] == '%' )
+                        {
+
+                            strlcat(new_string, replace, sizeof(new_string));
+
+                            i = i + 6;  /* Skip to end of %sagan% */
+
+                        }
+                    else
+                        {
+
+                            strlcat(new_string, "%", sizeof(new_string));
+                        }
+                }
+            else
+                {
+
+                    snprintf(tmp, sizeof(tmp), "%c", string[i]);
+                    strlcat(new_string, tmp, sizeof(new_string));
+
+                }
+        }
+
+
+    snprintf(str, size, "%s", new_string);
+}
+
+

@@ -207,6 +207,11 @@ int main(int argc, char **argv)
                             Debug->config = true;
                         }
 
+                    if (Sagan_strstr(optarg, "rules"))
+                        {
+                            Debug->rules = true;
+                        }
+
                     break;
 
 

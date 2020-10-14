@@ -10,6 +10,8 @@
 #define         MAX_RULE_CLASSIFICATION_DESC    96	/* Max long "classification size */
 #define		MAX_RULE_REFERENCE		2048	/* Make URL length for a reference */
 
+/* ^^^^^^^^^^^ Maybe rather than hardcode,  get the strlen and malloc the memory ?? */
+
 #define		MAX_RULE_SEARCH			10	/* Max "search" in a rule */
 #define		MAX_RULE_SEARCH_MASK		512	/* Max size of a search mask */
 #define		MAX_SEARCH_STRING		128	/* Max items in a search string */
@@ -43,7 +45,7 @@ struct _Rules
     bool search_type[MAX_RULE_SEARCH];
     bool search_case[MAX_RULE_SEARCH];
     bool search_not[MAX_RULE_SEARCH];
-    char search_mask[MAX_RULE_SEARCH_MASK];
+    char search_mask[MAX_RULE_SEARCH][MAX_RULE_SEARCH_MASK];
 
     uint8_t search_string_count;			/* Number of "search" requests. "search":
     							   { "0": { ... }, "1": { ... }} would be 2. */

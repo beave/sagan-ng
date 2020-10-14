@@ -34,12 +34,15 @@
 #include "rules.h"
 #include "counters.h"
 #include "var.h"
+#include "debug.h"
 
 #include "parsers/json.h"
 
 struct _Counters *Counters;
+struct _Debug *Debug;
 
 struct _Rules *Rules = NULL;
+
 
 
 void Load_Ruleset( const char *ruleset )
@@ -48,6 +51,7 @@ void Load_Ruleset( const char *ruleset )
     uint16_t i = 0;
     uint16_t a = 0;
     uint16_t k = 0;
+//    uint8_t  b = 0;
     uint8_t  z = 0;
 
     uint16_t search_string_count = 0;
@@ -61,6 +65,7 @@ void Load_Ruleset( const char *ruleset )
 
     char rulebuf[MAX_RULE_SIZE] = { 0 };
     char var_to_value[MAX_VAR_VALUE_SIZE] = { 0 };
+    char tmp[1024] = { 0 };
 
 
     FILE *rulesfile;
@@ -128,8 +133,10 @@ void Load_Ruleset( const char *ruleset )
             for ( i = 0; i < json_count; i++ )
                 {
 
-                    printf("[%d] Key: %s, Value: %s\n", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
-
+                    if ( Debug->rules )
+                        {
+                            Sagan_Log(DEBUG, "RULES: %d Key: %s, Value: %s", i, JSON_Key_String[i].key, JSON_Key_String[i].json);
+                        }
 
                     if ( !strcmp( JSON_Key_String[i].key, ".signature_id" ) )
                         {
@@ -222,7 +229,6 @@ void Load_Ruleset( const char *ruleset )
                             for ( a = 0; a < MAX_RULE_SEARCH; a++ )
                                 {
 
-
                                     // DO "MASK" - "mask": "This is a %SAGAN%",
 
                                     snprintf(tmpkey, MAX_JSON_KEY, ".%s.%d.string", s_e, a);
@@ -257,7 +263,7 @@ void Load_Ruleset( const char *ruleset )
                                                     char *tok1 = NULL;
                                                     search_count = 0;
 
-                                                    char tmp[1024];
+                                                    //char tmp[1024];
 
                                                     var_to_value[0] = ' ';
                                                     var_to_value[ strlen(var_to_value) - 2 ] = '\0';
@@ -274,10 +280,12 @@ void Load_Ruleset( const char *ruleset )
 
                                                             uint8_t ret = Pipe_To_Value( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, sizeof(tmp));
 
+                                                            if ( Debug->rules )
+                                                                {
+                                                                    Sagan_Log(DEBUG,"RULES: Rules[%d].search_string[%d][%d] == %s", Counters->rules, search_string_count, search_count, tmp);
+                                                                }
 
-                                                            printf("DEBUG: Rules[%d].search_string[%d][%d] == %s\n", Counters->rules, search_string_count, search_count, tmp);
                                                             strlcpy( Rules[Counters->rules].search_string[search_string_count][search_count], tmp, MAX_SEARCH_STRING_SIZE);
-
 
                                                             if ( ret > 0 )
                                                                 {
@@ -313,6 +321,16 @@ void Load_Ruleset( const char *ruleset )
                                                         {
                                                             strlcpy(Rules[Counters->rules].search_key[search_string_count], JSON_Key_String[k].json, MAX_JSON_KEY);
                                                         }
+
+
+                                                    snprintf(tmpkey, MAX_JSON_KEY, ".%s.%d.mask", s_e, a);
+                                                    tmpkey[ sizeof(tmpkey) - 1] = '\0';
+
+                                                    if ( !strcmp( JSON_Key_String[k].key, tmpkey ) )
+                                                        {
+                                                            strlcpy(Rules[Counters->rules].search_mask[search_string_count], JSON_Key_String[k].json, MAX_RULE_SEARCH_MASK);
+                                                        }
+
 
                                                     /* Is search/exclude case sensitive? */
 
@@ -372,25 +390,53 @@ void Load_Ruleset( const char *ruleset )
             /* Sanity Check! */
 
             Rules[Counters->rules].search_string_count = search_string_count;
-
             search_string_count = 0;	/* Reset for next pass */
 
-            Rules[Counters->rules].search_count;
-
-            printf("DEBUG: Total search items in this rule: %d\n", Rules[Counters->rules].search_string_count);
+            if ( Debug->rules )
+                {
+                    Sagan_Log(DEBUG, "RULES: Total search items in this rule: %d", Rules[Counters->rules].search_string_count);
+                }
 
 
             for ( a = 0; a < Rules[Counters->rules].search_string_count; a++ )
                 {
 
-                    printf("DEBUG: Count of nest search: Rules[%d].search_count[%d] == %d\n", Counters->rules, a, Rules[Counters->rules].search_count[a]);
-
-                    for ( k = 0; k < Rules[Counters->rules].search_count[a]; k++ )
+                    if ( Debug->rules)
                         {
 
-                            printf("DEBUG: Array Contents: KeyME: |%d %d.%d|%s|%s\n", Counters->rules, a, k, Rules[Counters->rules].search_key[a], Rules[Counters->rules].search_string[a][k]);
+                            Sagan_Log(DEBUG, "RULES: Count of nest search: Rules[%d].search_count[%d] == %d", Counters->rules, a, Rules[Counters->rules].search_count[a]);
+
+                            for ( k = 0; k < Rules[Counters->rules].search_count[a]; k++ )
+                                {
+                                    Sagan_Log(DEBUG, "RULES: Array Contents: |%d %d.%d|%s|%s", Counters->rules, a, k, Rules[Counters->rules].search_key[a], Rules[Counters->rules].search_string[a][k]);
+
+                                }
 
                         }
+
+		    /* If we have a mask (%SAGAN%),  then setup the new search strings */
+
+                    if ( Rules[Counters->rules].search_mask[a][0] != '\0' )
+                        {
+
+                            if ( Debug->rules )
+                                {
+                                    Sagan_Log(DEBUG, "RULES: Got mask \"%s\"", Rules[Counters->rules].search_mask[a]);
+                                }
+
+                            for (k = 0; k < Rules[Counters->rules].search_string_count; k++ )
+                                {
+                                    Replace_Sagan( Rules[Counters->rules].search_mask[a], Rules[Counters->rules].search_string[a][k], tmp, sizeof(tmp));
+                                    strlcpy( Rules[Counters->rules].search_string[a][k], tmp, MAX_SEARCH_STRING_SIZE);
+
+                                    if ( Debug->rules )
+                                        {
+                                            Sagan_Log(DEBUG, "RULES: New Rules[%d].search_string[%d][%d] wiht mask \"%s\"", Counters->rules, a, k, Rules[Counters->rules].search_string[a][k]);
+                                        }
+                                }
+                        }
+
+		    /* Sanity check */
 
                     if ( Rules[Counters->rules].search_key[a][0] == '\0' )
                         {
