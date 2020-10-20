@@ -311,6 +311,23 @@ int main(int argc, char **argv)
                 }
         }
 
+#ifdef PCRE_HAVE_JIT
+
+    /* We test if pages will support RWX before loading rules.  If it doesn't due to the OS,
+       we want to disable PCRE JIT now.  This prevents confusing warnings of PCRE JIT during
+       rule load */
+
+    Config->pcre_jit = true;
+
+    if (PageSupportsRWX() == false)
+        {
+            Sagan_Log(WARN, "The operating system doens't allow RWX pages.  Disabling PCRE JIT.");
+            Config->pcre_jit = false;
+        }
+
+#endif
+
+
 
     Load_YAML_Config( Config->config_yaml );
 

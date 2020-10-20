@@ -1,5 +1,12 @@
 
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"             /* From autoconf */
+#endif
+
+#include <pcre.h>
+
+
 #include "sagan-ng-defs.h"
 
 //#define         VALID_RULE_OPTIONS "signature_id"
@@ -10,17 +17,20 @@
 #define         MAX_RULE_CLASSIFICATION_DESC    96	/* Max long "classification size */
 #define		MAX_RULE_REFERENCE		2048	/* Make URL length for a reference */
 
-/* ^^^^^^^^^^^ Maybe rather than hardcode,  get the strlen and malloc the memory ?? */
 
-#define		MAX_RULE_SEARCH			10	/* Max "search" in a rule */
+/* "search" and "exclude" definitions */
+
+#define		MAX_RULE_SEARCH			10	/* Max "search" in a signature */
 #define		MAX_RULE_SEARCH_MASK		512	/* Max size of a search mask */
 #define		MAX_SEARCH_STRING		128	/* Max items in a search string */
 #define		MAX_SEARCH_STRING_SIZE		256	/* Max size of individual searches */
-
-
 #define		SEARCH_TYPE_EXACT		0	/* Default */
 #define		SEARCH_TYPE_CONTAINS		1
 
+/* "pcre" (regular expressions) definitions */
+
+#define		MAX_PCRE			5	/* Max "pcre" within a signature */
+#define		MAX_PCRE_SIZE			512	/* Max size of a regular expression */
 
 typedef struct _Rules _Rules;
 struct _Rules
@@ -33,6 +43,8 @@ struct _Rules
     char classification_desc[MAX_RULE_CLASSIFICATION_DESC];
     char normalize[MAX_JSON_KEY];
     char reference[MAX_RULE_REFERENCE];
+
+    /* "search" and "exclude" specific options */
 
     char search_string[MAX_RULE_SEARCH][MAX_SEARCH_STRING][MAX_SEARCH_STRING_SIZE];
 
@@ -48,6 +60,14 @@ struct _Rules
 
     uint8_t search_string_count;			/* Number of "search" requests. "search":
     							   { "0": { ... }, "1": { ... }} would be 2. */
+
+
+    /* "pcre" (regular expression) options */
+
+    uint8_t pcre_count;
+    pcre *re_pcre[MAX_PCRE];
+    pcre_extra *pcre_extra[MAX_PCRE];
+    char pcre_key[MAX_PCRE][MAX_JSON_KEY];
 
 
 };

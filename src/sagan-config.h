@@ -15,6 +15,7 @@ struct _Config
 //    bool         sagan_reload;
     bool         daemonize;
     bool         quiet;
+    bool	 pcre_jit;
 
     char 	 config_yaml[MAX_PATH];
 

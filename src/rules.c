@@ -19,7 +19,9 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* TODO:  var_to_value for things like "description", etc! */
+/* TODO:  var_to_value for things like "description", etc!
+   IMPORTANT:  "key" field needs to be a variable! For syslog compatibilty!
+   "break" when no more "searchs" are found (stop the loop */
 
 
 #ifdef HAVE_CONFIG_H
@@ -29,6 +31,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <pcre.h>
+
 
 #include "sagan-ng-defs.h"
 #include "sagan-ng.h"
@@ -44,6 +48,8 @@
 
 struct _Counters *Counters;
 struct _Debug *Debug;
+struct _Config *Config;
+
 
 struct _Rules *Rules = NULL;
 
@@ -59,8 +65,15 @@ void Load_Ruleset( const char *ruleset )
 
     uint64_t check = 0;
 
+    uint8_t pcre_switch = 0;
+    char pcre_rule[MAX_PCRE_SIZE] = { 0 };
+    uint16_t pcre_options=0;
+    uint8_t pcre_count = 0;
+    const char *pcre_error;
+    int pcre_erroffset;
+
+
     uint16_t search_string_count = 0;
-    uint8_t  serach_count = 0;
     uint8_t ret = 0;
 
     char tmpkey[MAX_JSON_KEY] = { 0 };
@@ -481,9 +494,151 @@ void Load_Ruleset( const char *ruleset )
 
                 }
 
+            /* PCRE */
+
+            for ( i = 0; i < json_count; i++ )
+                {
+
+                    for ( a = 0; a < MAX_PCRE; a++ )
+                        {
+
+                            snprintf(tmpkey, MAX_JSON_KEY, ".pcre.%d.expression", a);
+                            tmpkey[ sizeof(tmpkey) - 1] = '\0';
+
+                            printf("looking for: %s\n", tmpkey);
+
+                            if ( !strcmp( JSON_Key_String[i].key, tmpkey ) )
+                                {
+
+//			printf("GOT PCRE: |%s| |%c|\n", JSON_Key_String[i].json, JSON_Key_String[i].json[0]);
+                                    printf("Got match key: |%s|\n", tmpkey);
+
+                                    for ( k = 0; k < strlen(JSON_Key_String[i].json); k++ )
+                                        {
+                                            printf("%d\n", k);
+
+                                            /* Find opening for pcre */
+
+                                            if ( JSON_Key_String[i].json[k] == '/' )
+                                                {
+                                                    pcre_switch++;
+                                                }
+
+                                            if ( pcre_switch == 1 )
+                                                {
+                                                    snprintf(tmp, 2, "%c", JSON_Key_String[i].json[k+1]);
+                                                    strlcat(pcre_rule, tmp, MAX_PCRE_SIZE);
+                                                    //printf("Would copy: |%c|\n", JSON_Key_String[i].json[k+1]);
+                                                }
+
+                                            if ( pcre_switch == 2)
+                                                {
+
+                                                    switch(JSON_Key_String[i].json[k+1])
+                                                        {
+
+                                                        case 'i':
+                                                            pcre_options |= PCRE_CASELESS;
+                                                            break;
+                                                        case 's':
+                                                            pcre_options |= PCRE_DOTALL;
+                                                            break;
+                                                        case 'm':
+                                                            pcre_options |= PCRE_MULTILINE;
+                                                            break;
+                                                        case 'x':
+                                                            pcre_options |= PCRE_EXTENDED;
+                                                            break;
+                                                        case 'A':
+                                                            pcre_options |= PCRE_ANCHORED;
+                                                            break;
+                                                        case 'E':
+                                                            pcre_options |= PCRE_DOLLAR_ENDONLY;
+                                                            break;
+                                                        case 'G':
+                                                            pcre_options |= PCRE_UNGREEDY;
+                                                            break;
+                                                        }
+
+                                                    printf("F: |%s|\n", pcre_rule);
+                                                    printf("flag: %c\n", JSON_Key_String[i].json[k+1]);
+
+
+                                                }
+
+
+                                        }
+
+
+                                    /* Error checking */
+
+                                    if ( pcre_switch < 2 )
+                                        {
+                                            free(JSON_Key_String);
+                                            fclose(rulesfile);
+                                            Sagan_Log(ERROR, "[%s, line %d] Bad PCRE statement in %s at line %d. Abort", __FILE__, __LINE__, ruleset, line_count);
+                                        }
+
+                                    /* Clip last / from pcre string */
+
+                                    pcre_rule[ strlen(pcre_rule) - 1 ] = '\0';
+
+                                    /* Compile/study and store the results */
+
+                                    Rules[Counters->rules].re_pcre[pcre_count] = pcre_compile( pcre_rule, pcre_options, &pcre_error, &pcre_erroffset, NULL );
+
+#ifdef PCRE_HAVE_JIT
+
+                                    /* If we haeve PCRE JIT,  use it */
+
+                                    if ( Config->pcre_jit == true )
+                                        {
+                                            pcre_options |= PCRE_STUDY_JIT_COMPILE;
+                                        }
+#endif
+
+
+                                    Rules[Counters->rules].pcre_extra[pcre_count] = pcre_study( Rules[Counters->rules].re_pcre[pcre_count], pcre_options, &pcre_error);
+
+
+#ifdef PCRE_HAVE_JIT
+
+                                    if ( Config->pcre_jit == true )
+                                        {
+
+                                            int rc = 0;
+                                            int jit = 0;
+
+                                            rc = pcre_fullinfo(Rules[Counters->rules].re_pcre[pcre_count], Rules[Counters->rules].pcre_extra[pcre_count], PCRE_INFO_JIT, &jit);
+
+                                            if (rc != 0 || jit != 1)
+                                                {
+                                                    Sagan_Log(WARN, "[%s, line %d] PCRE JIT does not support regexp in %s at line %d (pcre: \"%s\"). Continuing without PCRE JIT enabled for this rule.", __FILE__, __LINE__, ruleset, line_count, pcre_rule);
+                                                }
+
+                                        }
+
+#endif
+
+                                    if (  Rules[Counters->rules].re_pcre[pcre_count]  == NULL )
+                                        {
+                                            Sagan_Log(ERROR, "[%s, line %d] PCRE failure in %s at %d [%d: %s].", __FILE__, __LINE__, ruleset, line_count, pcre_erroffset, pcre_error);
+
+                                        }
+
+                                    pcre_count++;
+                                    Rules[Counters->rules].pcre_count=pcre_count;
+
+                                }
+
+                        } /* for ( a = 0; a < MAX_PCRE ... */
+
+                }  /* for ( i = 0; i < json_count; (PCRE) */
+
             __atomic_add_fetch(&Counters->rules, 1, __ATOMIC_SEQ_CST);
 
         } /* while ( fgets(rulebuf .... */
+
 
     /* Verify we don't have duplicate signature id's! */
 
@@ -498,10 +653,11 @@ void Load_Ruleset( const char *ruleset )
                             free(JSON_Key_String);
                             fclose(rulesfile);
 
-                            Sagan_Log( ERROR, "[%s, line %d] Detected duplicate 'signature_id' number %" PRIu64 ".", __FILE__, __LINE__, Rules[check].signature_id );
+                            Sagan_Log( ERROR, "[%s, line %d] Detected duplicate 'signature_id' %" PRIu64 ".", __FILE__, __LINE__, Rules[check].signature_id );
                         }
                 }
         }
+
 
 
     free(JSON_Key_String);
