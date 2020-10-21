@@ -33,6 +33,7 @@
 #include "counters.h"
 
 #include "parsers/json.h"
+#include "parsers/search.h"
 
 #include "processors/engine.h"
 

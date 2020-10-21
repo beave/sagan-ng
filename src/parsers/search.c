@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
-** Copyright (C) 2009-2020 Quadrant Information Security <quadrantsec.com>
-** Copyright (C) 2009-2020 Champ Clark III <cclark@quadrantsec.com>
+** Copyright (C) 2020 Quadrant Information Security <quadrantsec.com>
+** Copyright (C) 2020 Champ Clark III <cclark@quadrantsec.com>
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License Version 2 as
@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <string.h>
 
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
@@ -35,8 +36,10 @@
 #include "util.h"
 #include "rules.h"
 #include "counters.h"
+
 #include "parsers/json.h"
 #include "parsers/search.h"
+#include "parsers/strstr-asm/strstr-hook.h"
 
 #include "processors/engine.h"
 
@@ -102,7 +105,7 @@ bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_Strin
                                                 {
                                                     /* Case sensitive */
 
-                                                    if ( Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
+                                                    if ( Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k] ) )
                                                         {
                                                             if ( Rules[rule_position].search_not[i] == false )
                                                                 {

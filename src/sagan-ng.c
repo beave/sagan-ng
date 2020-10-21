@@ -11,8 +11,8 @@ for "champtest" will get a hit.  But "this is a champtest" still won't
 
 /* $Id$ */
 /*
-** Copyright (C) 2009-2020 Quadrant Information Security <quadrantsec.com>
-** Copyright (C) 2009-2020 Champ Clark III <cclark@quadrantsec.com>
+** Copyright (C) 2020 Quadrant Information Security <quadrantsec.com>
+** Copyright (C) 2020 Champ Clark III <cclark@quadrantsec.com>
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License Version 2 as
@@ -44,6 +44,8 @@ for "champtest" will get a hit.  But "this is a champtest" still won't
 #include <getopt.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
@@ -60,9 +62,12 @@ for "champtest" will get a hit.  But "this is a champtest" still won't
 #include "processor.h"
 #include "batch.h"
 #include "rules.h"
+#include "output.h"
 #include "classifications.h"
+#include "config-yaml.h"
 
 #include "parsers/json.h"
+#include "parsers/strstr-asm/strstr-hook.h"
 
 #include "input-plugins/named-pipe.h"
 

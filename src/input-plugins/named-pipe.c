@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
-** Copyright (C) 2009-2020 Quadrant Information Security <quadrantsec.com>
-** Copyright (C) 2009-2020 Champ Clark III <cclark@quadrantsec.com>
+** Copyright (C) 2020 Quadrant Information Security <quadrantsec.com>
+** Copyright (C) 2020 Champ Clark III <cclark@quadrantsec.com>
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License Version 2 as
@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
@@ -143,11 +144,11 @@ void Input_Named_Pipe(void)
 
                 }
 
-            close(fd);
+            fclose(fd);
 
         }  /* Global_Death */
 
-    close(fd);
+    fclose(fd);
 //	printf("GOT DEATH!\n");
     exit(0);
 

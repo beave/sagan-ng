@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
-** Copyright (C) 2009-2020 Quadrant Information Security <quadrantsec.com>
-** Copyright (C) 2009-2020 Champ Clark III <cclark@quadrantsec.com>
+** Copyright (C) 2020 Quadrant Information Security <quadrantsec.com>
+** Copyright (C) 2020 Champ Clark III <cclark@quadrantsec.com>
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License Version 2 as
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
