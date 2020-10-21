@@ -335,7 +335,7 @@ void Between_Quotes(const char *in_str, char *str, size_t size)
     for ( i=0; i<strlen(in_str); i++)
         {
 
-            if ( flag == 1 && in_str[i] == '\"' )
+            if ( flag == true && in_str[i] == '\"' )
                 {
                     flag = false;
                 }
@@ -380,10 +380,9 @@ bool Validate_HEX (const char *string)
 bool Pipe_To_Value(const char *in_str, char *str, size_t size )
 {
 
-
 #define ALL_GOOD    0
 #define BAD_VALUE   1
-#define BAD_HEX	2
+#define BAD_HEX	    2
 
     bool pipe_flag = false;
 
