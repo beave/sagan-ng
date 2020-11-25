@@ -47,153 +47,101 @@ struct _Rules *Rules;
 struct _Counters *Counters;
 
 
-bool Search( uint32_t rule_position, uint16_t json_count, struct _JSON_Key_String *JSON_Key_String)
+bool Search( uint32_t rule_position, uint8_t s_position, char *json )
 {
 
-    uint8_t i = 0;
     uint8_t k = 0;
-    uint16_t a = 0;
-    uint8_t total_hits = 0;
 
-    bool flag = false;
-
-    /* Total "search" items rules */
-
-    for ( i = 0; i < Rules[rule_position].search_string_count; i++ )
+    if ( Rules[rule_position].search_type[s_position] == SEARCH_TYPE_CONTAINS )
         {
 
-//            if ( Rules[rule_position].search_not[i] == false )
-//                {
-            /* Go through JSON */
-
-            for ( a = 0; a < json_count; a++ )
+            for ( k = 0; k < Rules[rule_position].search_count[s_position]; k++ )
                 {
-                    /* Look for target key */
 
-                    if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].search_key[i]) )
+                    if ( Rules[rule_position].search_case[s_position] == false )
                         {
-                            /* Is search "contacts" or "exact" ? */
 
-                            if ( Rules[rule_position].search_type[i] == SEARCH_TYPE_CONTAINS )
+                            if ( Sagan_stristr( json, Rules[rule_position].search_string[s_position][k], true ) )
                                 {
-                                    /* Cycle through the # of searches (could be a list) */
 
-                                    for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
+                                    if ( Rules[rule_position].search_not[s_position] == true )
                                         {
-
-                                            if ( Rules[rule_position].search_case[i] == false )
-                                                {
-                                                    /* Case insensitive */
-
-                                                    if ( Sagan_stristr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k], true ) )
-                                                        {
-
-                                                            if ( Rules[rule_position].search_not[i] == false )
-                                                                {
-                                                                    total_hits++;
-                                                                    break;
-                                                                }
-                                                            else
-                                                                {
-                                                                    return(false);
-                                                                }
-
-                                                        }
-
-                                                }
-                                            else
-                                                {
-                                                    /* Case sensitive */
-
-                                                    if ( Sagan_strstr( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k] ) )
-                                                        {
-                                                            if ( Rules[rule_position].search_not[i] == false )
-                                                                {
-                                                                    total_hits++;
-                                                                    break;
-                                                                }
-                                                            else
-                                                                {
-                                                                    return(false);
-                                                                }
-                                                        }
-                                                }
-
-                                        } /* for ( k = 0; k < Rules[rule_position].search_count[i] */
-
-                                    /* If exclude and not found, its a "hit" */
-
-                                    if ( Rules[rule_position].search_not[i] == true )
-                                        {
-                                            total_hits++;
+                                            return(false);
                                         }
-
+                                    else
+                                        {
+                                            return(true);
+                                        }
                                 }
-                            else
+
+                        }
+                    else
+                        {
+
+                            if ( Sagan_strstr( json, Rules[rule_position].search_string[s_position][k] ) )
                                 {
 
-                                    /* Exact match */
-
-                                    for ( k = 0; k < Rules[rule_position].search_count[i]; k++ )
+                                    if ( Rules[rule_position].search_not[s_position] == true )
                                         {
-
-                                            if ( Rules[rule_position].search_case[i] == false )
-                                                {
-                                                    /* Case insensitive */
-
-                                                    if ( !strcasecmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k]) )
-                                                        {
-
-                                                            if ( Rules[rule_position].search_not[i] == false )
-                                                                {
-                                                                    total_hits++;
-                                                                    break;
-                                                                }
-                                                            else
-                                                                {
-                                                                    return(false);
-                                                                }
-                                                        }
-                                                }
-                                            else
-                                                {
-                                                    /* Case sensitive */
-
-                                                    if ( !strcmp( JSON_Key_String[a].json, Rules[rule_position].search_string[i][k] ) )
-                                                        {
-
-                                                            if ( Rules[rule_position].search_not[i] == false )
-                                                                {
-                                                                    total_hits++;
-                                                                    break;
-                                                                }
-                                                            else
-                                                                {
-                                                                    return(false);
-                                                                }
-                                                        }
-                                                }
-
-                                        } /* for ( k = 0; k < Rules[rule_position] */
-
-                                    /* If exclude and not found, its a "hit" */
-
-                                    if ( Rules[rule_position].search_not[i] == true )
+                                            return(false);
+                                        }
+                                    else
                                         {
-                                            total_hits++;
+                                            return(true);
                                         }
                                 }
                         }
-
-                } /* for ( a = 0; a < json_count */
+                }
 
         }
-
-//    printf("Total hits: %d of %d\n", total_hits, Rules[rule_position].search_string_count);
-
-    if ( total_hits == Rules[rule_position].search_string_count )
+    else
         {
-//	    printf("RETURN TRUE\n");
+
+            /* EXACT match */
+
+            for ( k = 0; k < Rules[rule_position].search_count[s_position]; k++ )
+                {
+
+                    if ( Rules[rule_position].search_case[s_position] == false )
+                        {
+
+                            if ( !strcasecmp( json, Rules[rule_position].search_string[s_position][k]) )
+                                {
+
+                                    if ( Rules[rule_position].search_not[s_position] == true )
+                                        {
+                                            return(false);
+                                        }
+                                    else
+                                        {
+                                            return(true);
+                                        }
+                                }
+
+                        }
+                    else
+                        {
+
+                            if ( !strcmp( json, Rules[rule_position].search_string[s_position][k] ) )
+                                {
+
+                                    if ( Rules[rule_position].search_not[s_position] == true )
+                                        {
+                                            return(false);
+                                        }
+                                    else
+                                        {
+                                            return(true);
+                                        }
+                                }
+                        }
+                }
+        }
+
+
+    if ( Rules[rule_position].search_not[s_position] == true )
+        {
+            printf("NOT RETURN TRUE\n");
             return(true);
         }
 

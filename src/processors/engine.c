@@ -46,31 +46,40 @@ void Engine( struct _JSON_Key_String *JSON_Key_String, uint16_t json_count )
 {
 
     uint32_t rule_position = 0;
+    uint16_t a = 0;
+    uint16_t match = 0; 
+    uint8_t s_position = 0;
     bool results = false;
 
     for ( rule_position = 0; rule_position < Counters->rules; rule_position++ )
         {
 
-            results = false;
+            for ( a = 0; a < json_count; a++ )
+                   {  
 
-            /* Do we need to do a "search" */
+		   for ( s_position = 0; s_position < Rules[rule_position].search_string_count; s_position++ )
+		           {
 
-            if ( Rules[rule_position].search_string_count != 0 )
-                {
-                    results = Search ( rule_position, json_count, JSON_Key_String);
-                }
+			   if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].search_key[s_position]) )
+			        {
+				if ( Search( rule_position, s_position, JSON_Key_String[a].json ) == true )
+					{
+					match++; 
+					}
+				}
 
 
-            if ( results == true )
-                {
-                    printf("%d ***** Fire event! ******\n", results);
-                }
-            else
-                {
-                    printf("- MISS -\n");
-                }
+			   }
 
-//	printf("Results: %d\n", results);
+		   }
+
+               printf("search_count = %d,  match = %d\n", Rules[rule_position].search_string_count, match);
+
+	       if ( match == Rules[rule_position].search_string_count )
+	       	{
+		printf("** TRIGGER **\n");
+		}
+
 
         }
 
