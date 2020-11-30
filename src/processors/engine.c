@@ -34,6 +34,7 @@
 
 #include "parsers/json.h"
 #include "parsers/search.h"
+#include "parsers/pcre.h"
 
 #include "processors/engine.h"
 
@@ -71,11 +72,31 @@ void Engine( struct _JSON_Key_String *JSON_Key_String, uint16_t json_count )
 
 			   }
 
-		   }
 
-               printf("search_count = %d,  match = %d\n", Rules[rule_position].search_string_count, match);
+		   printf("PCRE count: %d\n", Rules[rule_position].pcre_count);
 
-	       if ( match == Rules[rule_position].search_string_count )
+		   for ( s_position = 0; s_position < Rules[rule_position].pcre_count; s_position++ )
+		   	{
+
+//			printf("|%s|%s|\n", JSON_Key_String[a].key, Rules[rule_position].pcre_key[s_position]);
+
+			if ( !strcmp(JSON_Key_String[a].key, Rules[rule_position].pcre_key[s_position] ))
+				{
+
+				if ( Pcre( rule_position, s_position, JSON_Key_String[a].json ) == true )
+					{
+					match++;
+					}
+
+				}
+
+			}
+
+			}
+
+               printf("search_count = %d + pcre_count = %d,  match = %d\n", Rules[rule_position].search_string_count, Rules[rule_position].pcre_count, match);
+
+	       if ( match == Rules[rule_position].search_string_count + Rules[rule_position].pcre_count )
 	       	{
 		printf("** TRIGGER **\n");
 		}

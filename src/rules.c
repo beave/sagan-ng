@@ -516,7 +516,6 @@ void Load_Ruleset( const char *ruleset )
 
                                     for ( k = 0; k < strlen(JSON_Key_String[i].json); k++ )
                                         {
-                                            printf("%d\n", k);
 
                                             /* Find opening for pcre */
 
@@ -561,7 +560,7 @@ void Load_Ruleset( const char *ruleset )
                                                             break;
                                                         }
 
-                                                    printf("F: |%s|\n", pcre_rule);
+                                                    //printf("F: |%s|\n", pcre_rule);
                                                     printf("flag: %c\n", JSON_Key_String[i].json[k+1]);
 
 
@@ -569,7 +568,6 @@ void Load_Ruleset( const char *ruleset )
 
 
                                         }
-
 
                                     /* Error checking */
 
@@ -627,8 +625,37 @@ void Load_Ruleset( const char *ruleset )
 
                                         }
 
-                                    pcre_count++;
-                                    Rules[Counters->rules].pcre_count=pcre_count;
+//                                    pcre_count++;
+//                                    Rules[Counters->rules].pcre_count=pcre_count;
+
+				    for ( k = 0; k < json_count; k++ )
+				    	{
+
+					/* Search for key */
+
+					snprintf(tmpkey, MAX_JSON_KEY, ".pcre.%d.key", a);
+					tmpkey[ sizeof(tmpkey) - 1] = '\0';
+
+					if ( !strcmp( JSON_Key_String[k].key, tmpkey ) )
+						{
+						strlcpy(Rules[Counters->rules].pcre_key[pcre_count], JSON_Key_String[k].json, MAX_JSON_KEY);
+						printf("Got key: for %s == |%s|\n", tmpkey, Rules[Counters->rules].pcre_key[pcre_count]);
+						}
+
+					printf("Search for |%s|\n", tmpkey);
+
+					}
+
+					if ( Rules[Counters->rules].pcre_key[pcre_count][0] == '\0' )
+						{
+
+						Sagan_Log( ERROR, "[%s, line %d] There's no \".key\" specified for \"pre\" in signature id %" PRIu64 ".", __FILE__, __LINE__, Rules[check].signature_id );
+
+						}
+
+					pcre_count++;
+					Rules[Counters->rules].pcre_count=pcre_count;
+					printf("count: %d\n", pcre_count);
 
                                 }
 

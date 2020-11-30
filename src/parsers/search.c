@@ -44,7 +44,7 @@
 #include "processors/engine.h"
 
 struct _Rules *Rules;
-struct _Counters *Counters;
+//struct _Counters *Counters;
 
 
 bool Search( uint32_t rule_position, uint8_t s_position, char *json )
